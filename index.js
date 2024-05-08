@@ -52,6 +52,10 @@ const games_db = {
         dialect: 'sqlite',
         storage: 'gamesdb/flappybird.sqlite'
     }),
+    snake2: new Sequelize({
+        dialect: 'sqlite',
+        storage: 'gamesdb/snake2.sqlite'
+    }),
 };
 
 /*const sequelize = new Sequelize('mysql://username:your_password@localhost:3306/database_name', {
