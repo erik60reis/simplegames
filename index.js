@@ -67,6 +67,10 @@ const games_db = {
         dialect: 'sqlite',
         storage: 'gamesdb/pacman.sqlite'
     }),
+    pong: new Sequelize({
+        dialect: 'sqlite',
+        storage: 'gamesdb/pong.sqlite'
+    }),
 };
 
 /*const sequelize = new Sequelize('mysql://username:your_password@localhost:3306/database_name', {
