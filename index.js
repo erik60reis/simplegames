@@ -7,6 +7,8 @@ const expressHandlebars = require('express-handlebars');
 
 var JavaScriptObfuscator = require('javascript-obfuscator');
 
+let obfuscateJSCode = false;
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -18,30 +20,31 @@ const handlebars = expressHandlebars.create({
 app.engine('.html', handlebars.engine);
 app.set('view engine', '.html');
 
-app.use((req, res, next) => {
-    try {
-      if (req.url.endsWith('.js')) {
-        const obfuscatedCode = JavaScriptObfuscator.obfuscate(fs.readFileSync(path.join(__dirname, req.path), 'utf-8'), {
-            compact: true,
-            controlFlowFlattening: true,
-            controlFlowFlatteningThreshold: 1,
-            numbersToExpressions: true,
-            simplify: true,
-            stringArrayShuffle: true,
-            splitStrings: true,
-            stringArrayThreshold: 1
-        });
-        res.setHeader('Content-Type', 'text/javascript');
-        res.send(obfuscatedCode.getObfuscatedCode());
-      } else {
-        next();
-      }
-    } catch (error) {
-      console.error('Error obfuscating JavaScript:', error);
-      next();
-    }
-});
-
+if (obfuscateJSCode) {
+    app.use((req, res, next) => {
+        try {
+          if (req.url.endsWith('.js')) {
+            const obfuscatedCode = JavaScriptObfuscator.obfuscate(fs.readFileSync(path.join(__dirname, req.path), 'utf-8'), {
+                compact: true,
+                controlFlowFlattening: true,
+                controlFlowFlatteningThreshold: 1,
+                numbersToExpressions: true,
+                simplify: true,
+                stringArrayShuffle: true,
+                splitStrings: true,
+                stringArrayThreshold: 1
+            });
+            res.setHeader('Content-Type', 'text/javascript');
+            res.send(obfuscatedCode.getObfuscatedCode());
+          } else {
+            next();
+          }
+        } catch (error) {
+          console.error('Error obfuscating JavaScript:', error);
+          next();
+        }
+    });    
+}
 
 const games_db = {
     snake: new Sequelize({
@@ -55,6 +58,10 @@ const games_db = {
     snake2: new Sequelize({
         dialect: 'sqlite',
         storage: 'gamesdb/snake2.sqlite'
+    }),
+    dino: new Sequelize({
+        dialect: 'sqlite',
+        storage: 'gamesdb/dino.sqlite'
     }),
 };
 

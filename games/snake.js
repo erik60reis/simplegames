@@ -1,5 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+let canMove = true;
 
 const gridSize = 20;
 const snake = {
@@ -92,6 +93,8 @@ function update() {
         placeApple(); // Place a new apple when eaten
         updateScore(); // Update score display
     }
+
+    canMove = true;
 }
 
 function updateScore() {
@@ -99,25 +102,31 @@ function updateScore() {
 }
 
 function keyDownHandler(e) {
-    if (e.key === 'ArrowLeft' || e.key === 'a') {
-        if (snake.dx === 0) {
-            snake.dx = -gridSize;
-            snake.dy = 0;
-        }
-    } else if (e.key === 'ArrowRight' || e.key === 'd') {
-        if (snake.dx === 0) {
-            snake.dx = gridSize;
-            snake.dy = 0;
-        }
-    } else if (e.key === 'ArrowUp' || e.key === 'w') {
-        if (snake.dy === 0) {
-            snake.dy = -gridSize;
-            snake.dx = 0;
-        }
-    } else if (e.key === 'ArrowDown' || e.key === 's') {
-        if (snake.dy === 0) {
-            snake.dy = gridSize;
-            snake.dx = 0;
+    if (canMove) {
+        if (e.key === 'ArrowLeft' || e.key === 'a') {
+            if (snake.dx === 0) {
+                snake.dx = -gridSize;
+                snake.dy = 0;
+                canMove = false;
+            }
+        } else if (e.key === 'ArrowRight' || e.key === 'd') {
+            if (snake.dx === 0) {
+                snake.dx = gridSize;
+                snake.dy = 0;
+                canMove = false;
+            }
+        } else if (e.key === 'ArrowUp' || e.key === 'w') {
+            if (snake.dy === 0) {
+                snake.dy = -gridSize;
+                snake.dx = 0;
+                canMove = false;
+            }
+        } else if (e.key === 'ArrowDown' || e.key === 's') {
+            if (snake.dy === 0) {
+                snake.dy = gridSize;
+                snake.dx = 0;
+                canMove = false;
+            }
         }
     }
 }
