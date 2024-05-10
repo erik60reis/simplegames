@@ -1,145 +1,173 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-let canMove = true;
+(() => {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let canMove = true;
 
-const gridSize = 20;
-const snake = {
-    x: 160,
-    y: 160,
-    dx: gridSize,
-    dy: 0,
-    cells: [],
-    maxCells: 4
-};
+    const gridSize = 20;
+    const snake = {
+        x: 160,
+        y: 160,
+        dx: gridSize,
+        dy: 0,
+        cells: [],
+        maxCells: 4
+    };
 
-let apple = {
-    x: 320,
-    y: 320
-};
+    let apple = {
+        x: 320,
+        y: 320
+    };
 
-let score = 0;
-let highScore = localStorage.getItem(gamename + 'HighScore') || 0;
+    let score = 0;
+    let highScore = 0;
 
-const scoreElement = document.getElementById('score');
+    const scoreElement = document.getElementById('score');
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-}
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
 
-function placeApple() {
-    apple.x = getRandomInt(0, canvas.width / gridSize) * gridSize;
-    apple.y = getRandomInt(0, canvas.height / gridSize) * gridSize;
+    function placeApple() {
+        apple.x = getRandomInt(0, canvas.width / gridSize) * gridSize;
+        apple.y = getRandomInt(0, canvas.height / gridSize) * gridSize;
 
-    // Ensure the apple does not spawn on the snake
-    snake.cells.forEach((cell) => {
-        if (apple.x === cell.x && apple.y === cell.y) {
-            placeApple(); // Recursively place the apple again
+        // Ensure the apple does not spawn on the snake
+        snake.cells.forEach((cell) => {
+            if (apple.x === cell.x && apple.y === cell.y) {
+                placeApple(); // Recursively place the apple again
+            }
+        });
+    }
+
+    function resetGame() {
+        if (score > highScore) {
+            highScore = score;
         }
-    });
-}
-
-function resetGame() {
-    if (score > highScore) {
-        highScore = score;
-        localStorage.setItem(gamename + 'HighScore', highScore);
-    }
-    score = 0;
-    snake.x = 160;
-    snake.y = 160;
-    snake.cells = [];
-    snake.maxCells = 4;
-    snake.dx = gridSize;
-    snake.dy = 0;
-    placeApple(); // Place a new apple when resetting the game
-    updateScore(); // Update score and highScore display
-}
-
-function update() {
-    snake.x += snake.dx;
-    snake.y += snake.dy;
-
-    if (snake.x < 0 || snake.x >= canvas.width || snake.y < 0 || snake.y >= canvas.height) {
-        resetGame();
+        score = 0;
+        snake.x = 160;
+        snake.y = 160;
+        snake.cells = [];
+        snake.maxCells = 4;
+        snake.dx = gridSize;
+        snake.dy = 0;
+        placeApple(); // Place a new apple when resetting the game
+        updateScore(); // Update score and highScore display
     }
 
-    snake.cells.unshift({ x: snake.x, y: snake.y });
+    function update() {
+        snake.x += snake.dx;
+        snake.y += snake.dy;
 
-    if (snake.cells.length > snake.maxCells) {
-        snake.cells.pop();
-    }
-
-    snake.cells.forEach((cell, index) => {
-        if (index === 0) {
-            ctx.fillStyle = 'green';
-        } else {
-            ctx.fillStyle = 'lightgreen';
-        }
-        ctx.fillRect(cell.x, cell.y, gridSize - 1, gridSize - 1);
-
-        // Check collision with snake's own body
-        if (cell.x === snake.x && cell.y === snake.y && index > 0) {
+        if (snake.x < 0 || snake.x >= canvas.width || snake.y < 0 || snake.y >= canvas.height) {
             resetGame();
         }
-    });
 
-    // Draw apple
-    ctx.fillStyle = 'red';
-    ctx.fillRect(apple.x, apple.y, gridSize - 1, gridSize - 1);
+        snake.cells.unshift({ x: snake.x, y: snake.y });
 
-    // Check if snake eats the apple
-    if (snake.x === apple.x && snake.y === apple.y) {
-        snake.maxCells++;
-        score++;
-        placeApple(); // Place a new apple when eaten
-        updateScore(); // Update score display
+        if (snake.cells.length > snake.maxCells) {
+            snake.cells.pop();
+        }
+
+        snake.cells.forEach((cell, index) => {
+            if (index === 0) {
+                ctx.fillStyle = 'green';
+            } else {
+                ctx.fillStyle = 'lightgreen';
+            }
+            ctx.fillRect(cell.x, cell.y, gridSize - 1, gridSize - 1);
+
+            // Check collision with snake's own body
+            if (cell.x === snake.x && cell.y === snake.y && index > 0) {
+                resetGame();
+            }
+        });
+
+        // Draw apple
+        ctx.fillStyle = 'red';
+        ctx.fillRect(apple.x, apple.y, gridSize - 1, gridSize - 1);
+
+        // Check if snake eats the apple
+        if (snake.x === apple.x && snake.y === apple.y) {
+            snake.maxCells++;
+            score++;
+            placeApple(); // Place a new apple when eaten
+            updateScore(); // Update score display
+        }
+
+        canMove = true;
     }
 
-    canMove = true;
-}
+    function updateScore() {
+        scoreElement.textContent = `Score: ${score}  High Score: ${highScore}`;
+    }
 
-function updateScore() {
-    scoreElement.textContent = `Score: ${score}  High Score: ${highScore}`;
-}
-
-function keyDownHandler(e) {
-    if (canMove) {
-        if (e.key === 'ArrowLeft' || e.key === 'a') {
-            if (snake.dx === 0) {
-                snake.dx = -gridSize;
-                snake.dy = 0;
-                canMove = false;
-            }
-        } else if (e.key === 'ArrowRight' || e.key === 'd') {
-            if (snake.dx === 0) {
-                snake.dx = gridSize;
-                snake.dy = 0;
-                canMove = false;
-            }
-        } else if (e.key === 'ArrowUp' || e.key === 'w') {
-            if (snake.dy === 0) {
-                snake.dy = -gridSize;
-                snake.dx = 0;
-                canMove = false;
-            }
-        } else if (e.key === 'ArrowDown' || e.key === 's') {
-            if (snake.dy === 0) {
-                snake.dy = gridSize;
-                snake.dx = 0;
-                canMove = false;
+    function keyDownHandler(e) {
+        if (canMove) {
+            if (e.key === 'ArrowLeft' || e.key === 'a') {
+                if (snake.dx === 0) {
+                    snake.dx = -gridSize;
+                    snake.dy = 0;
+                    canMove = false;
+                }
+            } else if (e.key === 'ArrowRight' || e.key === 'd') {
+                if (snake.dx === 0) {
+                    snake.dx = gridSize;
+                    snake.dy = 0;
+                    canMove = false;
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'w') {
+                if (snake.dy === 0) {
+                    snake.dy = -gridSize;
+                    snake.dx = 0;
+                    canMove = false;
+                }
+            } else if (e.key === 'ArrowDown' || e.key === 's') {
+                if (snake.dy === 0) {
+                    snake.dy = gridSize;
+                    snake.dx = 0;
+                    canMove = false;
+                }
             }
         }
     }
-}
 
-document.addEventListener('keydown', keyDownHandler);
+    document.addEventListener('keydown', keyDownHandler);
 
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    update();
-}
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        update();
+    }
 
-updateScore(); // Atualiza a pontuação inicialmente
+    updateScore(); // Atualiza a pontuação inicialmente
 
-setInterval(() => {
-    gameLoop();
-}, 1000 / 20);
+    setInterval(() => {
+        gameLoop();
+    }, 1000 / 20);
+
+    document.getElementById("submithighscore").onclick = async function() {
+        const playerName = document.getElementById('playerName').value;
+        const currentScore = highScore;
+        if (playerName && currentScore > 0) {
+            try {
+                const response = await fetch(`/games/${gamename}/leaderboard`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: playerName, score: currentScore })
+                });
+                if (response.ok) {
+                    alert('High score submitted successfully!');
+                    fetchLeaderboard(); // Refresh leaderboard after submission
+                } else {
+                    throw new Error('Failed to submit high score');
+                }
+            } catch (error) {
+                console.error('Error submitting high score:', error);
+                alert('Failed to submit high score. Please try again.');
+            }
+        } else {
+            alert('Please enter your name and achieve a score greater than 0 to submit.');
+        }
+    }
+})();

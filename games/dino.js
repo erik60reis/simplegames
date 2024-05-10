@@ -1,3 +1,4 @@
+(() => {
 document.head.innerHTML += `
 <section id="offline-resources" style="display: none;">
 <img id="offline-resources-1x" src="/assets/dino-offline-sprite-1x.png" alt="T-Rex Runner Sprite">
@@ -1518,13 +1519,36 @@ function updateScore() {
     let score = Math.ceil(Runner.instance_.distanceRan * 0.025);
     let highScore = Math.ceil(Runner.instance_.highestScore * 0.025);
     scoreElement.textContent = `Score: ${score}  High Score: ${highScore}`;
-    localStorage.setItem(gamename + 'HighScore', highScore);
     requestAnimationFrame(updateScore);
 }
 
-let oldHighScore = window.localStorage.getItem(gamename + 'HighScore');
-if (oldHighScore) {
-    Runner.instance_.highestScore = oldHighScore / 0.025;
+updateScore();
+
+document.getElementById("submithighscore").onclick = async function() {
+    const playerName = document.getElementById('playerName').value;
+    const currentScore = Math.ceil(Runner.instance_.highestScore * 0.025);
+    if (playerName && currentScore > 0) {
+        try {
+            const response = await fetch(`/games/${gamename}/leaderboard`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: playerName, score: currentScore })
+            });
+            if (response.ok) {
+                alert('High score submitted successfully!');
+                fetchLeaderboard(); // Refresh leaderboard after submission
+            } else {
+                throw new Error('Failed to submit high score');
+            }
+        } catch (error) {
+            console.error('Error submitting high score:', error);
+            alert('Failed to submit high score. Please try again.');
+        }
+    } else {
+        alert('Please enter your name and achieve a score greater than 0 to submit.');
+    }
 }
 
-updateScore();
+})();
