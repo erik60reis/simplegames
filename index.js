@@ -46,46 +46,38 @@ if (obfuscateJSCode) {
     });
 }
 
-const games_db = {
-    snake: new Sequelize({
-        dialect: 'sqlite',
-        storage: 'gamesdb/snake.sqlite'
-    }),
-    flappybird: new Sequelize({
-        dialect: 'sqlite',
-        storage: 'gamesdb/flappybird.sqlite'
-    }),
-    snake2: new Sequelize({
-        dialect: 'sqlite',
-        storage: 'gamesdb/snake2.sqlite'
-    }),
-    dino: new Sequelize({
-        dialect: 'sqlite',
-        storage: 'gamesdb/dino.sqlite'
-    }),
-    pacman: new Sequelize({
-        dialect: 'sqlite',
-        storage: 'gamesdb/pacman.sqlite'
-    }),
-    pong: new Sequelize({
-        dialect: 'sqlite',
-        storage: 'gamesdb/pong.sqlite'
-    }),
-    snake3: new Sequelize({
-        dialect: 'sqlite',
-        storage: 'gamesdb/snake3.sqlite'
-    }),
-};
+const games_db = new Sequelize({
+    dialect: 'sqlite',
+    storage: 'database.sqlite'
+});
 
-/*const sequelize = new Sequelize('mysql://username:your_password@localhost:3306/database_name', {
-    dialect: 'mysql',
-    logging: false
-});*/
+let games = {};
 
+let gamefiles = fs.readdirSync(path.join(__dirname, 'games'));
 
-let LeaderboardEntry = {
-    
+for (let i = 0; i < gamefiles.length; i++) {
+    const gamename = gamefiles[i].replace(new RegExp(".js" + "$"), "");
+    games[gamename] = games_db.define(gamename, {
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true
+        },
+        score: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        }
+    });
 }
+
+// Sync all defined models with the database
+games_db.sync()
+    .then(() => {
+        console.log('Database and tables synchronized');
+    })
+    .catch((error) => {
+        console.error('Error synchronizing database:', error);
+    });
 
 app.use(bodyParser.json());
 
@@ -101,33 +93,9 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.use('/games', express.static(path.join(__dirname, 'games')));
 
-for (let i = 0; i < Object.keys(games_db).length; i++) {
-    const key = Object.keys(games_db)[i];
-
-    games_db[key].sync()
-        .then(() => {
-            console.log('Database and tables synchronized');
-        })
-        .catch((error) => {
-            console.error('Error synchronizing database:', error);
-        });
-    
-    LeaderboardEntry[key] = games_db[key].define('LeaderboardEntry', {
-        name: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true
-        },
-        score: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        }
-    });
-}
-
 app.get('/games/:gamename/leaderboard', async (req, res) => {
     try {
-        const leaderboard = await LeaderboardEntry[req.params.gamename].findAll({
+        const leaderboard = await games[req.params.gamename].findAll({
             order: [['score', 'DESC']],
             limit: 20,
             attributes: ['name', 'score']
@@ -142,7 +110,7 @@ app.get('/games/:gamename/leaderboard', async (req, res) => {
 app.post('/games/:gamename/leaderboard', async (req, res) => {
     const { name, score } = req.body;
     try {
-        let playerEntry = await LeaderboardEntry[req.params.gamename].findOne({ where: { name } });
+        let playerEntry = await games[req.params.gamename].findOne({ where: { name } });
 
         if (playerEntry) {
             if (score > playerEntry.score) {
@@ -153,7 +121,7 @@ app.post('/games/:gamename/leaderboard', async (req, res) => {
                 res.status(200).json(playerEntry);
             }
         } else {
-            const newEntry = await LeaderboardEntry[req.params.gamename].create({ name, score });
+            const newEntry = await games[req.params.gamename].create({ name, score });
             res.status(201).json(newEntry);
         }
     } catch (error) {
