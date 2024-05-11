@@ -6,10 +6,10 @@
     let isFlippedX = false;
     let isFlippedY = false;
 
-    const gridSize = 10;
+    const gridSize = 8;
     const snake = {
         x: 160,
-        y: 160,
+        y: 80,
         dx: gridSize,
         dy: 0,
         cells: [],
@@ -29,10 +29,17 @@
 
     let gameFrameRate = 1000 / 15;
 
-    for (let i = 0; i < 400; i++) {
+    for (let i = 0; i < (canvas.width / gridSize); i++) {
         walls.push({
-            x: i,
+            x: i * gridSize,
             y: 200
+        })
+    }
+
+    for (let i = 0; i < (canvas.width / gridSize); i++) {
+        walls.push({
+            x: 200 + i * gridSize,
+            y: 136
         })
     }
 
@@ -40,19 +47,19 @@
 
     for (let i = 0; i < teleporterwalllength; i++) {
         teleporters.push({
-            x: 350,
-            y: 100 - Math.round(teleporterwalllength * gridSize / 2) + i * gridSize,
+            x: 320,
+            y: 40 + i * gridSize,
             teleportTo: {
-                x: 50,
-                y: 300 - Math.round(teleporterwalllength * gridSize / 2) + i * gridSize
+                x: 40,
+                y: 240 + i * gridSize
             }
         });
         teleporters.push({
-            x: 50,
-            y: 300 - Math.round(teleporterwalllength * gridSize / 2) + i * gridSize,
+            x: 40,
+            y: 240 + i * gridSize,
             teleportTo: {
-                x: 350,
-                y: 100 - Math.round(teleporterwalllength * gridSize / 2) + i * gridSize
+                x: 320,
+                y: 40 + i * gridSize
             }
         });
     }
@@ -87,6 +94,12 @@
                 placeApple();
             }
         });
+
+        teleporters.forEach((teleporter) => {
+            if (apple.x === teleporter.x && teleporter.y === teleporter.y) {
+                placeApple();
+            }
+        });
     }
 
     function resetGame() {
@@ -100,7 +113,7 @@
         isFlippedX = false;
         isFlippedY = false;
         snake.x = 160;
-        snake.y = 160;
+        snake.y = 80;
         snake.cells = [];
         snake.maxCells = 4;
         snake.dx = gridSize;
@@ -218,7 +231,7 @@
             isAppleTeleporting = true;
         }else if (effectIndex === 14) {
             if (score <= 135) {
-                snake.maxCells = 139;
+                snake.maxCells = 10000;
             }
         }
     }

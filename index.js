@@ -7,7 +7,8 @@ const expressHandlebars = require('express-handlebars');
 
 var JavaScriptObfuscator = require('javascript-obfuscator');
 
-let obfuscateJSCode = false;
+let obfuscateJSCode = true;
+let codeNotAffectedByObfuscation = ['/assets/babylon.js'];
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,7 +24,7 @@ app.set('view engine', '.html');
 if (obfuscateJSCode) {
     app.use((req, res, next) => {
         try {
-          if (req.url.endsWith('.js')) {
+          if (req.url.endsWith('.js') && !codeNotAffectedByObfuscation.includes(req.path)) {
             const obfuscatedCode = JavaScriptObfuscator.obfuscate(fs.readFileSync(path.join(__dirname, req.path), 'utf-8'), {
                 compact: true,
                 controlFlowFlattening: true,
@@ -36,14 +37,13 @@ if (obfuscateJSCode) {
             });
             res.setHeader('Content-Type', 'text/javascript');
             res.send(obfuscatedCode.getObfuscatedCode());
-          } else {
-            next();
-          }
+            } else {
+                next();
+            }
         } catch (error) {
-          console.error('Error obfuscating JavaScript:', error);
-          next();
+            next();
         }
-    });    
+    });
 }
 
 const games_db = {
