@@ -8,7 +8,7 @@ const expressHandlebars = require('express-handlebars');
 var JavaScriptObfuscator = require('javascript-obfuscator');
 
 let obfuscateJSCode = true;
-let codeNotAffectedByObfuscation = ['/assets/babylon.js'];
+let codeNotAffectedByObfuscation = ['/assets/babylon.js', '/assets/isaacCSPRNG.min.js'];
 
 const app = express();
 const PORT = process.env.PORT || 3000;

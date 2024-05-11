@@ -1,4 +1,21 @@
 (() => {
+    let masterseed = 'qwertyuiopzxcvbnm';
+    let localstoragekeypassword = 'password---password';
+    let localstoragevaluepassword = 'mnbvcxzpoiuytrewq';
+    let webstorage = {
+        setItem: (key, value) => {
+            let chiper = isaacCSPRNG(masterseed);
+            window.localStorage.setItem(chiper.encipher(localstoragekeypassword, key), chiper.encipher(localstoragevaluepassword, value));
+        },
+        getItem: (key) => {
+            let chiper = isaacCSPRNG(masterseed);
+            let itemEncryptedValue = window.localStorage.getItem(chiper.encipher(localstoragekeypassword, key));
+            if (itemEncryptedValue) {
+                return chiper.decipher(localstoragevaluepassword, itemEncryptedValue);
+            }
+        }
+    };
+
     let pacmanscore = 0;
     let pacmanhighscore = 0;
 
@@ -306,10 +323,11 @@
         };
 
         function initUser() {
-            let highscore = 0;
+            let highscore = parseInt(webstorage.getItem(gamename + "HighScore")) || 0;
             if (score > highscore) {
                 highscore = score;
                 pacmanhighscore = highscore;
+                webstorage.setItem(gamename + "HighScore", pacmanhighscore.toString());
             }
             score = 0;
             pacmanscore = score;
@@ -863,6 +881,7 @@
             }else{
                 if (user.theScore() > pacmanhighscore) {
                     pacmanhighscore = user.theScore();
+                    webstorage.setItem(gamename + "HighScore", pacmanhighscore.toString());
                 }
             }
         }

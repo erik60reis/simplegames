@@ -1,4 +1,21 @@
 (() => {
+    let masterseed = 'qwertyuiopzxcvbnm';
+    let localstoragekeypassword = 'password---password';
+    let localstoragevaluepassword = 'mnbvcxzpoiuytrewq';
+    let webstorage = {
+        setItem: (key, value) => {
+            let chiper = isaacCSPRNG(masterseed);
+            window.localStorage.setItem(chiper.encipher(localstoragekeypassword, key), chiper.encipher(localstoragevaluepassword, value));
+        },
+        getItem: (key) => {
+            let chiper = isaacCSPRNG(masterseed);
+            let itemEncryptedValue = window.localStorage.getItem(chiper.encipher(localstoragekeypassword, key));
+            if (itemEncryptedValue) {
+                return chiper.decipher(localstoragevaluepassword, itemEncryptedValue);
+            }
+        }
+    };
+
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     
@@ -9,7 +26,7 @@
     let obstacles = [];
     let gameSpeed = 2;
     let score = 0;
-    let highScore = 0;
+    let highScore = parseInt(webstorage.getItem(gamename + "HighScore")) || 0;
     
     document.addEventListener("keydown", (event) => {
         if (event.code === "Space" || event.key === " " || event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
@@ -73,6 +90,7 @@
     function gameOver() {
         if (score > highScore) {
             highScore = score;
+            webstorage.setItem(gamename + "HighScore", highScore.toString());
         }
         resetGame();
     }

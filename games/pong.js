@@ -1,4 +1,21 @@
 (() => {
+    let masterseed = 'qwertyuiopzxcvbnm';
+    let localstoragekeypassword = 'password---password';
+    let localstoragevaluepassword = 'mnbvcxzpoiuytrewq';
+    let webstorage = {
+        setItem: (key, value) => {
+            let chiper = isaacCSPRNG(masterseed);
+            window.localStorage.setItem(chiper.encipher(localstoragekeypassword, key), chiper.encipher(localstoragevaluepassword, value));
+        },
+        getItem: (key) => {
+            let chiper = isaacCSPRNG(masterseed);
+            let itemEncryptedValue = window.localStorage.getItem(chiper.encipher(localstoragekeypassword, key));
+            if (itemEncryptedValue) {
+                return chiper.decipher(localstoragevaluepassword, itemEncryptedValue);
+            }
+        }
+    };
+    
     const scoreElement = document.getElementById('score');
 
     // Obtendo referência ao canvas e ao contexto 2D
@@ -7,7 +24,7 @@
 
     // Definições iniciais do jogo
     let score = 0;
-    let highScore = 0;
+    let highScore = parseInt(webstorage.getItem(gamename + "HighScore")) || 0;
     let gameOver = false;
 
     // Configurações do paddle
@@ -79,6 +96,7 @@
     function resetGame() {
         if (score > highScore) {
             highScore = score;
+            webstorage.setItem(gamename + "HighScore", highScore.toString());
         }
         score = 0;
         ballX = canvas.width / 2;
