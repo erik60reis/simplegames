@@ -90,6 +90,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use('/games', express.static(path.join(__dirname, 'games')));
 
