@@ -24,6 +24,7 @@
     let isFlippedY = false;
 
     const gridSize = 8;
+
     const snake = {
         x: 160,
         y: 80,
@@ -89,6 +90,82 @@
     let score = 0;
     let highScore = parseInt(webstorage.getItem(gamename + "HighScore")) || 0;
 
+    const dailyChallengesKey = gamename + 'DailyChallenges';
+
+    function initializeDailyChallenges() {
+        const challenges = JSON.parse(webstorage.getItem(dailyChallengesKey) || "{}");
+        const currentDate = new Date();
+        const lastResetDate = challenges?.lastResetDate ? new Date(challenges.lastResetDate) : null;
+
+        if (!lastResetDate || currentDate.getDate() !== lastResetDate.getDate()) {
+            const newChallenges = {
+                lastResetDate: currentDate.toISOString(),
+                scoreChallenge: 40,
+                teleporterChallenge: 25,
+                gamesPlayedChallenge: 10
+            };
+            webstorage.setItem(dailyChallengesKey, JSON.stringify(newChallenges));
+        }
+
+        displayChallengeProgress();
+    }
+
+    function updateChallengeProgress() {
+        const challenges = JSON.parse(webstorage.getItem(dailyChallengesKey) || "{}");
+
+        if (!challenges.lastResetDate) return;
+
+        challenges.scoreChallenge = Math.max(challenges.scoreChallenge - score, 0);
+
+        if (score >= 1) {
+            challenges.gamesPlayedChallenge = Math.max(challenges.gamesPlayedChallenge - 1, 0);
+        }
+
+        webstorage.setItem(dailyChallengesKey, JSON.stringify(challenges));
+
+        displayChallengeProgress();
+    }
+
+    function displayChallengeProgress() {
+        document.getElementById("submithighscore").disabled = true;
+        const challenges = JSON.parse(webstorage.getItem(dailyChallengesKey) || "{}");
+
+        if (!challenges.lastResetDate) return;
+
+        if (challenges.scoreChallenge === 0 && challenges.teleporterChallenge === 0 && challenges.gamesPlayedChallenge === 0) {
+            document.getElementById("submithighscore").disabled = false;
+        }
+
+        document.getElementById("DailyChallenges").innerHTML = `
+            <h3>Daily Challenges</h3>
+            <table id="leaderboardTable">
+                <tr>
+                    <th id="challenge-scoreChallenge">Eat Apples (${40 - challenges.scoreChallenge}/40)</th>
+                </tr>
+                <tr>
+                    <th id="challenge-teleporterChallenge">Use Teleporters (${25 - challenges.teleporterChallenge}/25)</th>
+                </tr>
+                <tr>
+                    <th  id="challenge-gamesPlayedChallenge">Play games (${10 - challenges.gamesPlayedChallenge}/10)</th>
+                </tr>
+            </table>
+        `;
+
+        if (challenges.scoreChallenge <= 0) {
+            document.getElementById("challenge-scoreChallenge").style.textDecoration = "line-through";
+        }
+
+        if (challenges.teleporterChallenge <= 0) {
+            document.getElementById("challenge-teleporterChallenge").style.textDecoration = "line-through";
+        }
+
+        if (challenges.gamesPlayedChallenge <= 0) {
+            document.getElementById("challenge-gamesPlayedChallenge").style.textDecoration = "line-through";
+        }
+    }
+
+    initializeDailyChallenges();
+
     const scoreElement = document.getElementById('score');
 
     function getRandomInt(min, max) {
@@ -120,6 +197,7 @@
     }
 
     function resetGame() {
+        updateChallengeProgress();
         if (score > highScore) {
             highScore = score;
             webstorage.setItem(gamename + "HighScore", highScore.toString());
@@ -202,6 +280,15 @@
             if (teleporter.x === snake.x && teleporter.y === snake.y) {
                 snake.x = teleporter.teleportTo.x;
                 snake.y = teleporter.teleportTo.y;
+
+                const challenges = JSON.parse(webstorage.getItem(dailyChallengesKey) || "{}");
+    
+                if (challenges.lastResetDate) {
+                    if (challenges.teleporterChallenge > 0) {
+                        challenges.teleporterChallenge -= 1;
+                        webstorage.setItem(dailyChallengesKey, JSON.stringify(challenges));
+                    }
+                }
                 break;
             }
         }

@@ -36,8 +36,10 @@
     // Configurações da bola
     let ballX = canvas.width / 2;
     let ballY = canvas.height / 2;
+    let ballDirectionX = 1;
+    let ballDirectionY = 1;
     let ballSpeedX = 5; // Velocidade horizontal da bola
-    let ballSpeedY = 7.5; // Velocidade vertical da bola
+    let ballSpeedY = 5; // Velocidade vertical da bola
     const ballRadius = 8;
 
     // Função principal de desenho e atualização do jogo
@@ -59,26 +61,29 @@
         ctx.closePath();
 
         // Movimentar a bola
-        ballX += ballSpeedX;
-        ballY += ballSpeedY;
+        ballX += ballDirectionX * ballSpeedX;
+        ballY += ballDirectionY * ballSpeedY;
+
+        ballSpeedX = Math.min(ballSpeedX + 0.01, 10);
+        ballSpeedY = Math.min(ballSpeedY + 0.01, 10);
 
         // Verificar colisão com o paddle
         if (
             ballX - ballRadius <= 5 + paddleWidth &&
             ballY >= paddleY && ballY <= paddleY + paddleHeight
         ) {
-            ballSpeedX = Math.abs(ballSpeedX);
+            ballDirectionX = Math.abs(ballDirectionX);
             let deltaY = ballY - (paddleY + paddleHeight / 2);
             ballSpeedY = deltaY * 0.2;
         }
 
         if (ballX + ballRadius >= canvas.width) {
-            ballSpeedX = -ballSpeedX;
+            ballDirectionX = -ballDirectionX;
             score += 1;
         }
 
         if (ballY + ballRadius >= canvas.height || ballY - ballRadius <= 0) {
-            ballSpeedY = -ballSpeedY;
+            ballDirectionY = -ballDirectionY;
         }
 
         if (ballX - ballRadius <= 0) {
@@ -102,7 +107,9 @@
         ballX = canvas.width / 2;
         ballY = canvas.height / 2;
         ballSpeedX = 5;
-        ballSpeedY = 7.5;
+        ballSpeedY = 5;
+        ballDirectionX = 1;
+        ballDirectionY = 1;
         paddleY = (canvas.height - paddleHeight) / 2;
         gameOver = false;
     }
