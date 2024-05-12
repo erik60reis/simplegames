@@ -38,6 +38,86 @@
     let score = 0;
     let highScore = parseInt(webstorage.getItem(gamename + "HighScore")) || 0;
 
+    const dailyChallengesKey = gamename + 'DailyChallenges';
+
+    function initializeDailyChallenges() {
+        const challenges = JSON.parse(webstorage.getItem(dailyChallengesKey) || "{}");
+        const currentDate = new Date();
+        const lastResetDate = challenges?.lastResetDate ? new Date(challenges.lastResetDate) : null;
+
+        if (!lastResetDate || currentDate.getDate() !== lastResetDate.getDate()) {
+            const newChallenges = {
+                lastResetDate: currentDate.toISOString(),
+                scoreChallenge: 150,
+                appleEdgeChallenge: false,
+                gamesPlayedChallenge: 30
+            };
+            webstorage.setItem(dailyChallengesKey, JSON.stringify(newChallenges));
+        }
+
+        displayChallengeProgress();
+    }
+
+    function updateChallengeProgress() {
+        const challenges = JSON.parse(webstorage.getItem(dailyChallengesKey) || "{}");
+
+        if (!challenges.lastResetDate) return;
+
+        challenges.scoreChallenge = Math.max(challenges.scoreChallenge - score, 0);
+
+        if (score >= 1) {
+            challenges.gamesPlayedChallenge = Math.max(challenges.gamesPlayedChallenge - 1, 0);
+        }
+
+        webstorage.setItem(dailyChallengesKey, JSON.stringify(challenges));
+
+        displayChallengeProgress();
+    }
+
+    function displayChallengeProgress() {
+        document.getElementById("submithighscore").disabled = true;
+        const challenges = JSON.parse(webstorage.getItem(dailyChallengesKey) || "{}");
+
+        if (!challenges.lastResetDate) return;
+
+        if (challenges.scoreChallenge === 0 && challenges.appleEdgeChallenge && challenges.gamesPlayedChallenge === 0) {
+            document.getElementById("submithighscore").disabled = false;
+        }
+
+        document.getElementById("DailyChallenges").innerHTML = `
+            <h3>Daily Challenges</h3>
+            <table id="leaderboardTable">
+                <tr>
+                    <th id="challenge-scoreChallenge">Eat Apples (${150 - challenges.scoreChallenge}/150)</th>
+                </tr>
+                <tr>
+                    <th id="challenge-appleEdgeChallenge">Eat an Apple on the edge of the board</th>
+                </tr>
+                <tr>
+                    <th  id="challenge-gamesPlayedChallenge">Play games (${30 - challenges.gamesPlayedChallenge}/30)</th>
+                </tr>
+            </table>
+        `;
+
+        if (challenges.scoreChallenge <= 0) {
+            document.getElementById("challenge-scoreChallenge").style.textDecoration = "line-through";
+        }
+
+        if (challenges.appleEdgeChallenge) {
+            document.getElementById("challenge-appleEdgeChallenge").style.textDecoration = "line-through";
+        }
+
+        if (challenges.gamesPlayedChallenge <= 0) {
+            document.getElementById("challenge-gamesPlayedChallenge").style.textDecoration = "line-through";
+        }
+    }
+
+    function appleOnEdge() {
+        return ((apple.x === 0 || apple.x === canvas.width - gridSize) || (apple.y === 0 || apple.y === canvas.height - gridSize));
+    }
+
+    initializeDailyChallenges();
+
     const scoreElement = document.getElementById('score');
 
     function getRandomInt(min, max) {
@@ -54,9 +134,14 @@
                 placeApple(); // Recursively place the apple again
             }
         });
+
+        if (apple.x === 0 && apple.y === 0) {
+            placeApple();
+        }
     }
 
     function resetGame() {
+        updateChallengeProgress();
         if (score > highScore) {
             highScore = score;
             webstorage.setItem(gamename + "HighScore", highScore.toString());
@@ -108,6 +193,17 @@
         if (snake.x === apple.x && snake.y === apple.y) {
             snake.maxCells++;
             score++;
+            const challenges = JSON.parse(webstorage.getItem(dailyChallengesKey) || "{}");
+    
+            if (challenges.lastResetDate) {
+                if (!challenges.appleEdgeChallenge) {
+                    if (appleOnEdge()) {
+                        challenges.appleEdgeChallenge = true;
+                        webstorage.setItem(dailyChallengesKey, JSON.stringify(challenges));
+                    }
+                }
+            }
+
             placeApple(); // Place a new apple when eaten
             updateScore(); // Update score display
         }
