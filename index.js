@@ -68,7 +68,7 @@ for (let i = 0; i < gamefiles.length; i++) {
             allowNull: false
         },
         replay: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: true,
             unique: false
         },
