@@ -52,7 +52,6 @@
 
     function resetGame() {
         replayframeindex = 0;
-        updateChallengeProgress();
         currentReplay.randomSeed = Math.random();
         randomNumberGenerator = isaacCSPRNG(currentReplay.randomSeed);
         currentReplay.replayCode = "";
