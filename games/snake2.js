@@ -192,6 +192,7 @@
     document.getElementById("submithighscore").onclick = async function() {
         const playerName = document.getElementById('playerName').value;
         const currentScore = highScore;
+        highScoreReplay = JSON.parse(webstorage.getItem(gamename + "HighScoreReplay") || "{}");
         if (playerName && currentScore > 0) {
             try {
                 const response = await fetch(`/games/${gamename}/leaderboard`, {
