@@ -15,6 +15,11 @@
             }
         }
     };
+
+    let currentReplay = {
+        randomSeed: Math.random(),
+        replayCode: ""
+    };
     
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -43,7 +48,7 @@
 
     let teleporters = [
         
-    ]
+    ];
 
     let gameFrameRate = 1000 / 15;
 
@@ -89,6 +94,7 @@
 
     let score = 0;
     let highScore = parseInt(webstorage.getItem(gamename + "HighScore")) || 0;
+    let highScoreReplay = JSON.parse(webstorage.getItem(gamename + "HighScoreReplay") || "{}");
 
     const dailyChallengesKey = gamename + 'DailyChallenges';
 
@@ -167,9 +173,11 @@
     initializeDailyChallenges();
 
     const scoreElement = document.getElementById('score');
+    
+    let randomNumberGenerator = isaacCSPRNG(currentReplay.randomSeed);
 
     function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min)) + min;
+        return Math.floor(randomNumberGenerator.random() * (max - min)) + min;
     }
 
     function placeApple() {
@@ -179,29 +187,24 @@
         // Ensure the apple does not spawn on the snake
         snake.cells.forEach((cell) => {
             if (apple.x === cell.x && apple.y === cell.y) {
-                placeApple();
-            }
-        });
-
-        walls.forEach((wall) => {
-            if (apple.x === wall.x && apple.y === wall.y) {
-                placeApple();
-            }
-        });
-
-        teleporters.forEach((teleporter) => {
-            if (apple.x === teleporter.x && teleporter.y === teleporter.y) {
-                placeApple();
+                placeApple(); // Recursively place the apple again
             }
         });
     }
+
+    placeApple();
 
     function resetGame() {
         updateChallengeProgress();
         if (score > highScore) {
             highScore = score;
             webstorage.setItem(gamename + "HighScore", highScore.toString());
+            highScoreReplay = currentReplay;
+            webstorage.setItem(gamename + "HighScoreReplay", JSON.stringify(highScoreReplay));
         }
+        currentReplay.randomSeed = Math.random();
+        randomNumberGenerator = isaacCSPRNG(currentReplay.randomSeed);
+        currentReplay.replayCode = "";
         score = 0;
         gameFrameRate = 1000 / 15;
         isAppleTeleporting = false;
@@ -221,6 +224,19 @@
     function update() {
         snake.x += snake.dx;
         snake.y += snake.dy;
+
+        if (snake.dx === gridSize && snake.dy === 0) {
+            currentReplay.replayCode += "r";
+        }
+        if (snake.dx === -gridSize && snake.dy === 0) {
+            currentReplay.replayCode += "l";
+        }
+        if (snake.dx === 0 && snake.dy === gridSize) {
+            currentReplay.replayCode += "d";
+        }
+        if (snake.dx === 0 && snake.dy === -gridSize) {
+            currentReplay.replayCode += "u";
+        }
 
         if (isAppleTeleporting) {
             applenextteleportcooldown--;
@@ -395,6 +411,7 @@
     document.getElementById("submithighscore").onclick = async function() {
         const playerName = document.getElementById('playerName').value;
         const currentScore = highScore;
+        highScoreReplay = JSON.parse(webstorage.getItem(gamename + "HighScoreReplay") || "{}");
         if (playerName && currentScore > 0) {
             try {
                 const response = await fetch(`/games/${gamename}/leaderboard`, {
@@ -402,7 +419,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name: playerName, score: currentScore })
+                    body: JSON.stringify({ name: playerName, score: currentScore, replay: highScoreReplay })
                 });
                 if (response.ok) {
                     alert('High score submitted successfully!');

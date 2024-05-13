@@ -51,7 +51,6 @@
     placeApple();
 
     function resetGame() {
-
         replayframeindex = 0;
         updateChallengeProgress();
         currentReplay.randomSeed = Math.random();
