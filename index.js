@@ -46,10 +46,7 @@ if (obfuscateJSCode) {
     });
 }
 
-const games_db = new Sequelize({
-    dialect: 'sqlite',
-    storage: 'database.sqlite'
-});
+const games_db = require('./databaseconfig.js');
 
 let games = {};
 
