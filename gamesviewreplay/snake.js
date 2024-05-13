@@ -51,7 +51,7 @@
     placeApple();
 
     function resetGame() {
-        /*
+
         replayframeindex = 0;
         updateChallengeProgress();
         currentReplay.randomSeed = Math.random();
@@ -66,7 +66,7 @@
         snake.dy = 0;
         placeApple(); // Place a new apple when resetting the game
         updateScore(); // Update score and highScore display
-        */
+
        window.location.href = window.location.href;
     }
 

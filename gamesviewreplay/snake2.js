@@ -50,7 +50,7 @@
     placeApple();
 
     function resetGame() {
-        /*
+
         replayframeindex = 0;
         randomNumberGenerator = isaacCSPRNG(currentReplay.randomSeed);
         score = 0;
@@ -62,7 +62,7 @@
         snake.dy = 0;
         placeApple(); // Place a new apple when resetting the game
         updateScore(); // Update score and highScore display
-        */
+
        window.location.href = window.location.href;
     }
 
