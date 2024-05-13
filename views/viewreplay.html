@@ -59,14 +59,6 @@
 <body>
     <div id="othergames">
         <a href="/">SimpleGames by Erik Reis</a> <br/> <br/> <br/> <br/>
-        <a href="/game/snake">Snake Game</a> <br/> <br/>
-        <a href="/game/snake2">Snake 2</a> <br/> <br/>
-        <a href="/game/snake3">Snake 3</a> <br/> <br/>
-        <a href="/game/flappybird">Flappy Bird Game</a> <br/> <br/>
-        <a href="/game/dino">Dino Game</a> <br/> <br/>
-        <a href="/game/pacman">Pac Man</a> <br/> <br/>
-        <a href="/game/pong">Pong</a> <br/> <br/>
-        <a href="/game/infinitejump">Infinite Jump</a> <br/> <br/>
     </div>
     <div id="mainContainer">
         <div id="gameContainer">
@@ -105,14 +97,15 @@
     <script src="/assets/isaacCSPRNG.min.js"></script>
     <script>
         let gamename = "{{gamename}}";
+        let username = "{{username}}";
         
         function createScript(src) {
             let script = document.createElement('script');
             script.src = src;
             document.body.appendChild(script);
         }
-        createScript(`/games/${gamename}.js`);
         createScript(`/assets/leaderboardfunctions.js`);
+        createScript(`/gamesviewreplay/${gamename}.js`);
     </script>
 </body>
 </html>

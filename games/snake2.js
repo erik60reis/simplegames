@@ -15,6 +15,11 @@
             }
         }
     };
+
+    let currentReplay = {
+        randomSeed: Math.random(),
+        replayCode: ""
+    };
     
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -37,11 +42,14 @@
 
     let score = 0;
     let highScore = parseInt(webstorage.getItem(gamename + "HighScore")) || 0;
+    let highScoreReplay = JSON.parse(webstorage.getItem(gamename + "HighScoreReplay") || "{}");
 
     const scoreElement = document.getElementById('score');
+    
+    let randomNumberGenerator = isaacCSPRNG(currentReplay.randomSeed);
 
     function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min)) + min;
+        return Math.floor(randomNumberGenerator.random() * (max - min)) + min;
     }
 
     function placeApple() {
@@ -56,11 +64,18 @@
         });
     }
 
+    placeApple();
+
     function resetGame() {
         if (score > highScore) {
             highScore = score;
             webstorage.setItem(gamename + "HighScore", highScore.toString());
+            highScoreReplay = currentReplay;
+            webstorage.setItem(gamename + "HighScoreReplay", JSON.stringify(highScoreReplay));
         }
+        currentReplay.randomSeed = Math.random();
+        randomNumberGenerator = isaacCSPRNG(currentReplay.randomSeed);
+        currentReplay.replayCode = "";
         score = 0;
         snake.x = 160;
         snake.y = 160;
@@ -76,6 +91,18 @@
         snake.x += snake.dx;
         snake.y += snake.dy;
 
+        if (snake.dx === gridSize && snake.dy === 0) {
+            currentReplay.replayCode += "r";
+        }
+        if (snake.dx === -gridSize && snake.dy === 0) {
+            currentReplay.replayCode += "l";
+        }
+        if (snake.dx === 0 && snake.dy === gridSize) {
+            currentReplay.replayCode += "d";
+        }
+        if (snake.dx === 0 && snake.dy === -gridSize) {
+            currentReplay.replayCode += "u";
+        }
         if (snake.x < 0 || snake.x >= canvas.width || snake.y < 0 || snake.y >= canvas.height) {
             resetGame();
         }
@@ -172,7 +199,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name: playerName, score: currentScore })
+                    body: JSON.stringify({ name: playerName, score: currentScore, replay: highScoreReplay })
                 });
                 if (response.ok) {
                     alert('High score submitted successfully!');

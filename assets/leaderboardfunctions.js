@@ -8,6 +8,7 @@ async function fetchLeaderboard() {
             const row = `<tr><td>${index + 1}</td><td>${entry.name}</td><td>${entry.score}</td></tr>`;
             leaderboardTable.innerHTML += row;
         });
+        return leaderboardData;
     } catch (error) {
         console.error('Error fetching leaderboard:', error);
     }

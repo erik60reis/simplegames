@@ -15,6 +15,11 @@
             }
         }
     };
+
+    let currentReplay = {
+        randomSeed: Math.random(),
+        replayCode: ""
+    };
     
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -37,6 +42,29 @@
 
     let score = 0;
     let highScore = parseInt(webstorage.getItem(gamename + "HighScore")) || 0;
+    let highScoreReplay = JSON.parse(webstorage.getItem(gamename + "HighScoreReplay") || "{}");
+
+    const scoreElement = document.getElementById('score');
+    
+    let randomNumberGenerator = isaacCSPRNG(currentReplay.randomSeed);
+
+    function getRandomInt(min, max) {
+        return Math.floor(randomNumberGenerator.random() * (max - min)) + min;
+    }
+
+    function placeApple() {
+        apple.x = getRandomInt(1, (canvas.width / gridSize) - 1) * gridSize;
+        apple.y = getRandomInt(1, (canvas.height / gridSize) - 1) * gridSize;
+
+        // Ensure the apple does not spawn on the snake
+        snake.cells.forEach((cell) => {
+            if (apple.x === cell.x && apple.y === cell.y) {
+                placeApple(); // Recursively place the apple again
+            }
+        });
+    }
+
+    placeApple();
 
     const dailyChallengesKey = gamename + 'DailyChallenges';
 
@@ -118,34 +146,17 @@
 
     initializeDailyChallenges();
 
-    const scoreElement = document.getElementById('score');
-
-    function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min)) + min;
-    }
-
-    function placeApple() {
-        apple.x = getRandomInt(0, canvas.width / gridSize) * gridSize;
-        apple.y = getRandomInt(0, canvas.height / gridSize) * gridSize;
-
-        // Ensure the apple does not spawn on the snake
-        snake.cells.forEach((cell) => {
-            if (apple.x === cell.x && apple.y === cell.y) {
-                placeApple(); // Recursively place the apple again
-            }
-        });
-
-        if (apple.x === 0 && apple.y === 0) {
-            placeApple();
-        }
-    }
-
     function resetGame() {
         updateChallengeProgress();
         if (score > highScore) {
             highScore = score;
             webstorage.setItem(gamename + "HighScore", highScore.toString());
+            highScoreReplay = currentReplay;
+            webstorage.setItem(gamename + "HighScoreReplay", JSON.stringify(highScoreReplay));
         }
+        currentReplay.randomSeed = Math.random();
+        randomNumberGenerator = isaacCSPRNG(currentReplay.randomSeed);
+        currentReplay.replayCode = "";
         score = 0;
         snake.x = 160;
         snake.y = 160;
@@ -160,6 +171,19 @@
     function update() {
         snake.x += snake.dx;
         snake.y += snake.dy;
+
+        if (snake.dx === gridSize && snake.dy === 0) {
+            currentReplay.replayCode += "r";
+        }
+        if (snake.dx === -gridSize && snake.dy === 0) {
+            currentReplay.replayCode += "l";
+        }
+        if (snake.dx === 0 && snake.dy === gridSize) {
+            currentReplay.replayCode += "d";
+        }
+        if (snake.dx === 0 && snake.dy === -gridSize) {
+            currentReplay.replayCode += "u";
+        }
 
         if (snake.x < 0 || snake.x >= canvas.width || snake.y < 0 || snake.y >= canvas.height) {
             resetGame();
@@ -268,7 +292,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name: playerName, score: currentScore })
+                    body: JSON.stringify({ name: playerName, score: currentScore, replay: highScoreReplay })
                 });
                 if (response.ok) {
                     alert('High score submitted successfully!');

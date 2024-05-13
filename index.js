@@ -66,7 +66,12 @@ for (let i = 0; i < gamefiles.length; i++) {
         score: {
             type: DataTypes.INTEGER,
             allowNull: false
-        }
+        },
+        replay: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: false
+        },
     });
 }
 
@@ -85,6 +90,10 @@ app.use('/game/:gamename', (req, res, next) => {
     res.render(path.join(__dirname, 'views', 'game.html'), {gamename: req.params.gamename});
 });
 
+app.use('/viewreplay/:gamename/:username', (req, res, next) => {
+    res.render(path.join(__dirname, 'views', 'viewreplay.html'), {gamename: req.params.gamename, username: req.params.username});
+});
+
 app.get('/', (req, res) => {
     res.render(path.join(__dirname, 'views', 'index.html'), {});
 })
@@ -93,13 +102,14 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use('/games', express.static(path.join(__dirname, 'games')));
+app.use('/gamesviewreplay', express.static(path.join(__dirname, 'gamesviewreplay')));
 
 app.get('/games/:gamename/leaderboard', async (req, res) => {
     try {
         const leaderboard = await games[req.params.gamename].findAll({
             order: [['score', 'DESC']],
             limit: 20,
-            attributes: ['name', 'score']
+            attributes: ['name', 'score', 'replay']
         });
         res.json(leaderboard);
     } catch (error) {
@@ -109,20 +119,21 @@ app.get('/games/:gamename/leaderboard', async (req, res) => {
 });
 
 app.post('/games/:gamename/leaderboard', async (req, res) => {
-    const { name, score } = req.body;
+    const { name, score, replay } = req.body;
     try {
         let playerEntry = await games[req.params.gamename].findOne({ where: { name } });
 
         if (playerEntry) {
             if (score > playerEntry.score) {
                 playerEntry.score = score;
+                playerEntry.replay = JSON.stringify(replay);
                 await playerEntry.save();
                 res.status(200).json(playerEntry);
             } else {
                 res.status(200).json(playerEntry);
             }
         } else {
-            const newEntry = await games[req.params.gamename].create({ name, score });
+            const newEntry = await games[req.params.gamename].create({ name, score, replay: JSON.stringify(replay) });
             res.status(201).json(newEntry);
         }
     } catch (error) {
