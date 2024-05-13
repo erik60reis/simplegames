@@ -98,13 +98,14 @@
     <script>
         let gamename = "{{gamename}}";
         let username = "{{username}}";
-        
+    </script>
+    <script src="/assets/leaderboardfunctions.js"></script>
+    <script>
         function createScript(src) {
             let script = document.createElement('script');
             script.src = src;
             document.body.appendChild(script);
         }
-        createScript(`/assets/leaderboardfunctions.js`);
         createScript(`/gamesviewreplay/${gamename}.js`);
     </script>
 </body>
