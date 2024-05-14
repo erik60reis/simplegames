@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleGames Engine by Erik Reis</title>
+    <!-- Incluindo a biblioteca Blockly -->
+    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+    <style>
+        #gameCanvas {
+            border: 1px solid black;
+            width: 100%;
+            height: 100%;
+        }
+        #canvasContainer {
+            width: 30%; height: 30%; overflow: hidden;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; height: 100vh; display: flex; flex-grow: 1;">
+
+    <!-- Div para o Canvas (50% da largura da tela) -->
+    <div id="canvasContainer">
+        <div id="score">Score: 0  High Score: 0</div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <!-- Div para os Blocos Blockly (50% da largura da tela) -->
+    <div id="blocklyDiv" style="width: 100%; height: 100%;"></div>
+
+    <script>
+        var workspace = null
+        // Função para inicializar o Blockly na div 'blocklyDiv'
+        function startBlockly() {
+            // Criando um objeto workspace para o Blockly
+            workspace = Blockly.inject('blocklyDiv', {
+                media: 'https://unpkg.com/blockly/media/',
+                toolbox: document.getElementById('toolbox')
+            });
+        }
+
+        function saveBlocks() {
+            var xml = Blockly.Xml.workspaceToDom(workspace);
+            var xmlText = Blockly.Xml.domToText(xml);
+            localStorage.setItem('savedBlocks', xmlText);
+            console.log("Blocks saved!");
+        }
+
+        // Função para desserializar e restaurar os blocos
+        function loadBlocks() {
+            var xmlText = localStorage.getItem('savedBlocks');
+            if (xmlText) {
+                var parser = new DOMParser();
+                var xmlDom = parser.parseFromString(xmlText, 'text/xml');
+                Blockly.Xml.domToWorkspace(xmlDom.documentElement, workspace);
+                console.log("Blocks loaded!");
+            } else {
+                console.log("No saved blocks found.");
+            }
+        }
+
+
+
+
+        Blockly.Blocks['draw_rectangle'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("Draw Rect: ")
+
+                this.appendValueInput("color").setCheck("String").appendField("color");
+                this.appendValueInput("x").setCheck("Number").appendField("x");
+                this.appendValueInput("y").setCheck("Number").appendField("y");
+                this.appendValueInput("width").setCheck("Number").appendField("width");
+                this.appendValueInput("height").setCheck("Number").appendField("height");
+
+                this.setInputsInline(true);
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(230);
+                this.setTooltip("Draw a rectangle");
+            }
+        };
+
+        // Definir código gerado pelos blocos personalizados
+        Blockly.JavaScript['draw_rectangle'] = function(block) {
+            var color = Blockly.JavaScript.valueToCode(block, 'color', Blockly.JavaScript.ORDER_ATOMIC) || "red";
+            var width = Blockly.JavaScript.valueToCode(block, 'width', Blockly.JavaScript.ORDER_ATOMIC) || 0;
+            var height = Blockly.JavaScript.valueToCode(block, 'height', Blockly.JavaScript.ORDER_ATOMIC) || 0;
+            var x = Blockly.JavaScript.valueToCode(block, 'x', Blockly.JavaScript.ORDER_ATOMIC) || 0;
+            var y = Blockly.JavaScript.valueToCode(block, 'y', Blockly.JavaScript.ORDER_ATOMIC) || 0;
+            var code = `
+                globals_system.ctx.fillStyle = ${color};
+                globals_system.ctx.fillRect(${x}, ${y}, ${width}, ${height});
+            `;
+            return code;
+        };
+
+        Blockly.Blocks['clear_screen'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("Clear Screen")
+
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(230);
+                this.setTooltip("Clears the screen");
+            }
+        };
+
+        Blockly.JavaScript['clear_screen'] = function(block) {
+            var code = `
+                globals_system.ctx.clearRect(0, 0, canvas.width, canvas.height);
+            `;
+            return code;
+        };
+
+        Blockly.Blocks['set_score'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("Set Score to ")
+
+                this.appendValueInput("newscore").setCheck("Number").appendField("newscore: ");
+
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(230);
+                this.setTooltip("Set the user score");
+            }
+        };
+
+        Blockly.JavaScript['set_score'] = function(block) {
+            var newscore = Blockly.JavaScript.valueToCode(block, 'newscore', Blockly.JavaScript.ORDER_ATOMIC) || 0;
+            var code = `
+                globals_system.score = ${newscore};
+                globals_system.updateScore();
+            `;
+            return code;
+        };
+
+        Blockly.Blocks['on_key_down'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("When key down:")
+                    .appendField(new Blockly.FieldTextInput("Enter key"), "KEY");
+
+                this.appendStatementInput("DO")
+                    .setCheck(null)
+                    .appendField("do");
+
+                this.setColour(230);
+                this.setTooltip("Run this block when the specified key is pressed.");
+                this.setHelpUrl("");
+            }
+        };
+
+        Blockly.JavaScript['on_key_down'] = function(block) {
+            var key = block.getFieldValue('KEY');
+            var doBranch = Blockly.JavaScript.statementToCode(block, 'DO');
+
+            var code = `
+                document.addEventListener('keydown', function(e) {
+                    if (e.key.toLowerCase() === '${key.toLowerCase()}') {
+                        ${doBranch}
+                    }
+                });
+            `;
+            return code;
+        };
+
+        Blockly.Blocks['random_between'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("Random Number Between ");
+                this.appendValueInput("min")
+                    .setCheck("Number")
+                    .appendField("min");
+                this.appendValueInput("max")
+                    .setCheck("Number")
+                    .appendField("max");
+
+
+                this.setInputsInline(true);
+                this.setOutput(true, "Number");
+                this.setColour(230);
+                this.setTooltip("Generates a Random Number");
+                this.setHelpUrl("");
+            }
+        };
+
+        Blockly.JavaScript['random_between'] = function(block) {
+            var value_min = Blockly.JavaScript.valueToCode(block, 'min', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+            var value_max = Blockly.JavaScript.valueToCode(block, 'max', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+
+            var code = `Math.floor(Math.random() * (${value_max} - ${value_min} + 1) + ${value_min})`;
+            return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+        };
+
+
+
+
+        // Botão "Run" para executar os blocos Blockly
+        function runCode() {
+            // Limpar o canvas antes de executar os blocos
+            var canvas = document.getElementById('gameCanvas');
+            var ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Executar os blocos Blockly
+            var code = Blockly.JavaScript.workspaceToCode(workspace);
+            eval(`
+                let globals_system = {
+                canvas: document.getElementById('gameCanvas'),
+                webstorage: {
+                    setItem: (key, value) => {
+                        let chiper = isaacCSPRNG(masterseed);
+                        window.localStorage.setItem(chiper.encipher(localstoragekeypassword, key), chiper.encipher(localstoragevaluepassword, value));
+                    },
+                    getItem: (key) => {
+                        let chiper = isaacCSPRNG(masterseed);
+                        let itemEncryptedValue = window.localStorage.getItem(chiper.encipher(localstoragekeypassword, key));
+                        if (itemEncryptedValue) {
+                            return chiper.decipher(localstoragevaluepassword, itemEncryptedValue);
+                        }
+                    }
+                },
+                score: 0,
+                highScore: 0,
+                scoreElement: document.getElementById('score'),
+                updateScore: function () {
+                    globals_system.scoreElement.textContent = 'Score: ' + globals_system.score + ' High Score: ' + globals_system.highScore;
+                }
+                };
+                globals_system.ctx = globals_system.canvas.getContext('2d');
+            ${code}`); // Executar o código gerado
+            saveBlocks();
+        }
+
+        // Executando as funções quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            startBlockly();
+            loadBlocks();
+        });
+    </script>
+
+    <!-- Definição da área de blocos Blockly (pode ser personalizada conforme necessário) -->
+    <xml id="toolbox" style="display: none">
+        <category name="Logic" colour="#5C81A6">
+          <block type="controls_if"></block>
+          <block type="logic_compare"></block>
+          <block type="logic_operation"></block>
+          <block type="logic_negate"></block>
+          <block type="logic_boolean"></block>
+        </category>
+      
+        <category name="Controls" colour="#A675A1">
+          <block type="controls_repeat_ext"></block>
+          <block type="controls_whileUntil"></block>
+          <block type="controls_for"></block>
+          <block type="controls_if"></block>
+        </category>
+      
+        <category name="Math" colour="#5CA65C">
+          <block type="math_number"></block>
+          <block type="math_arithmetic"></block>
+          <block type="math_single"></block>
+          <block type="math_trig"></block>
+        </category>
+      
+        <category name="Text" colour="#5CA68D">
+          <block type="text"></block>
+          <block type="text_join"></block>
+          <block type="text_length"></block>
+          <block type="text_print"></block>
+        </category>
+      
+        <category name="Lists" colour="#745CA6">
+          <block type="lists_create_empty"></block>
+          <block type="lists_create_with"></block>
+          <block type="lists_repeat"></block>
+          <block type="lists_length"></block>
+        </category>
+      
+        <category name="Variables" colour="#A65C81" custom="VARIABLE"></category>
+      
+        <category name="Functions" colour="#A6A65C" custom="PROCEDURE"></category>
+
+        <category name="Game Screen" colour="#00AA00">
+            <block type="draw_rectangle"></block>
+            <block type="clear_screen"></block>
+            <block type="set_score"></block>
+            <block type="random_between"></block>
+        </category>
+
+        <category name="Input" colour="#00AA00">
+            <block type="on_key_down"></block>
+        </category>
+    </xml>
+
+    <button onclick="runCode()">Run</button>
+
+</body>
+</html>
