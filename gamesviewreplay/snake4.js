@@ -1,11 +1,23 @@
-(async () => {    
+(async () => {
+    let replayuser = await (async () => {
+        let leaderboard = await fetchLeaderboard();
+        return leaderboard.find(u => u.name === username);
+    })();
+
+    let currentReplay = JSON.parse(replayuser.replay);
+
+    let replayframeindex = 0;
+    
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+
+    canvas.width = "500";
+    canvas.height = "500";
 
     let isFlippedX = false;
     let isFlippedY = false;
 
-    const gridSize = 8;
+    const gridSize = 20;
 
     const snake = {
         x: 160,
@@ -27,7 +39,7 @@
         
     ];
 
-    let gameFrameRate = 1000 / 15;
+    let gameFrameRate = 1000 / 22;
 
     for (let i = 0; i < (canvas.width / gridSize); i++) {
         walls.push({
@@ -36,14 +48,7 @@
         })
     }
 
-    for (let i = 0; i < (canvas.width / gridSize); i++) {
-        walls.push({
-            x: 200 + i * gridSize,
-            y: 136
-        })
-    }
-
-    let teleporterwalllength = 10;
+    let teleporterwalllength = 4;
 
     for (let i = 0; i < teleporterwalllength; i++) {
         teleporters.push({
@@ -70,15 +75,7 @@
     };
 
     let score = 0;
-    let replayuser = await (async () => {
-        let leaderboard = await fetchLeaderboard();
-        return leaderboard.find(u => u.name === username);
-    })();
 
-    let currentReplay = JSON.parse(replayuser.replay);
-
-    let replayframeindex = 0;
-    
     const scoreElement = document.getElementById('score');
     
     let randomNumberGenerator = isaacCSPRNG(currentReplay.randomSeed);
@@ -97,16 +94,27 @@
                 placeApple(); // Recursively place the apple again
             }
         });
+        
+        walls.forEach((element) => {
+            if (apple.x === element.x && apple.y === element.y) {
+                placeApple();
+            }
+        });
+
+        teleporters.forEach((element) => {
+            if (apple.x === element.x && apple.y === element.y) {
+                placeApple();
+            }
+        });
     }
 
     placeApple();
 
     function resetGame() {
-        currentReplay.randomSeed = Math.random();
         randomNumberGenerator = isaacCSPRNG(currentReplay.randomSeed);
         currentReplay.replayCode = "";
         score = 0;
-        gameFrameRate = 1000 / 15;
+        gameFrameRate = 1000 / 22;
         isAppleTeleporting = false;
         applenextteleportcooldown = 25;
         isFlippedX = false;
@@ -120,7 +128,7 @@
         placeApple(); // Place a new apple when resetting the game
         updateScore(); // Update score and highScore display
 
-       window.location.href = window.location.href;
+        window.location.href = window.location.href;
     }
 
     function update() {
@@ -170,9 +178,9 @@
         
         snake.cells.forEach((cell, index) => {
             if (index === 0) {
-                ctx.fillStyle = '#FF00FF';
+                ctx.fillStyle = 'darkgreen';
             } else {
-                ctx.fillStyle = 'lightpink';
+                ctx.fillStyle = '#99bb8a';
             }
             ctx.fillRect(cell.x, cell.y, gridSize - 1, gridSize - 1);
 
@@ -194,7 +202,7 @@
         });
 
         for (let teleporter of teleporters) {
-            ctx.fillStyle = '#FF00FF';
+            ctx.fillStyle = '#006076';
 
             ctx.fillRect(teleporter.x, teleporter.y, gridSize - 1, gridSize - 1);
 
@@ -217,9 +225,15 @@
             placeApple(); // Place a new apple when eaten
             updateScore(); // Update score display
             applyEffect();
+
+            gameFrameRate -= 0.5;
+            if (gameFrameRate < 25) {
+                gameFrameRate = 25;
+            }
         }
+
+        
         ctx.restore();
-    
         replayframeindex++;
     }
 
@@ -232,19 +246,7 @@
 
         snake.maxCells = score + 4;
 
-        if (effectIndex === 1) {
-            gameFrameRate = 1000 / 5;
-        }else if (effectIndex === 2) {
-            gameFrameRate = 1000 / 15;
-        }else if (effectIndex === 0) {
-            gameFrameRate = 1000 / 25;
-        }else if (effectIndex === 3) {
-            isFlippedX = true;
-        }else if (effectIndex === 4) {
-            gameFrameRate = 1000 / 20;
-        }else if (effectIndex === 5) {
-            gameFrameRate = 1000 / 15;
-        }else if (effectIndex >= 8 && effectIndex <= 9) {
+        if (effectIndex >= 8 && effectIndex <= 9) {
             isAppleTeleporting = true;
         }else if (effectIndex === 14) {
             if (score <= 135) {
