@@ -18,6 +18,26 @@ let webstorage = {
 const canvas = document.getElementById('gameCanvas');
 const context = canvas.getContext('2d');
 
+// Track the state of each key
+const keyState = {};
+
+// Add event listener for keydown events
+window.addEventListener('keydown', (event) => {
+    // Prevent default actions (e.g., scrolling for arrow keys)
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) {
+        event.preventDefault();
+    }
+
+    // Update the state of the key to pressed (true)
+    keyState[event.key] = true;
+});
+
+// Add event listener for keyup events
+window.addEventListener('keyup', (event) => {
+    // Update the state of the key to not pressed (false)
+    keyState[event.key] = false;
+});
+
 let playerImage = new Image();
 playerImage.src = "/assets/impossiblejumpassets/player.png";
 
@@ -93,12 +113,32 @@ const doodle = {
 
 // keep track of player direction and actions
 let playerDir = 0;
-let keydown = false;
 let prevDoodleY = doodle.y;
+
+
+function isSomeKeyPressed(keycodelist) {
+    for (let keycode of keycodelist) {
+        if (keyState[keycode] === true) {
+            return true;
+        }
+    }
+    return false;
+}
 
 // game loop
 function loop() {
     requestAnimationFrame(loop);
+
+    if (isSomeKeyPressed(["ArrowLeft", "a"])) {
+        playerDir = -1;
+        doodle.dx = -3;
+    }
+    // right arrow key
+    else if (isSomeKeyPressed(["ArrowRight", "d"])) {
+        playerDir = 1;
+        doodle.dx = 3;
+    }
+    
     context.clearRect(0,0,canvas.width,canvas.height);
 
     // apply gravity to doodle
@@ -162,7 +202,7 @@ function loop() {
     }
 
     // only apply drag to horizontal movement if key is not pressed
-    if (!keydown) {
+    if (!isSomeKeyPressed("ArrowLeft", "a", "ArrowRight", "d")) {
         if (playerDir < 0) {
             doodle.dx += drag;
 
@@ -170,7 +210,7 @@ function loop() {
             if (doodle.dx > 0) {
                 doodle.dx = 0;
                 playerDir = 0;
-        }
+            }
         }
         else if (playerDir > 0) {
             doodle.dx -= drag;
@@ -234,27 +274,6 @@ function loop() {
   })
 }
 
-document.addEventListener('keyup', function(e) {
-  keydown = false;
-});
-
-// listen to keyboard events to move doodle
-document.addEventListener('keydown', function(e) {
-  // left arrow key
-  if (["ArrowLeft", "a"].includes(e.key)) {
-    keydown = true;
-    playerDir = -1;
-    doodle.dx = -3;
-
-  }
-  // right arrow key
-  else if (["ArrowRight", "d"].includes(e.key)) {
-    keydown = true;
-    playerDir = 1;
-    doodle.dx = 3;
-  }
-});
-
 function resetGame() {
     if (score > highScore) {
         highScore = score;
@@ -295,8 +314,7 @@ function resetGame() {
   
     // Reset player direction and key state
     playerDir = 0;
-    keydown = false;
-  
+
     // Reset platform space parameters
     minPlatformSpace = 15;
     maxPlatformSpace = 20;
