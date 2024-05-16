@@ -234,6 +234,10 @@ function loop() {
   })
 }
 
+document.addEventListener('keyup', function(e) {
+  keydown = false;
+});
+
 // listen to keyboard events to move doodle
 document.addEventListener('keydown', function(e) {
   // left arrow key
@@ -249,10 +253,6 @@ document.addEventListener('keydown', function(e) {
     playerDir = 1;
     doodle.dx = 3;
   }
-});
-
-document.addEventListener('keyup', function(e) {
-  keydown = false;
 });
 
 function resetGame() {
