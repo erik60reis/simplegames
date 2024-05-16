@@ -45,7 +45,7 @@ let groundImage = new Image();
 groundImage.src = "/assets/impossiblejumpassets/ground.png";
 
 let score = 0;
-let highScore = parseInt(webstorage.getItem(gamename + "HighScore")) || 0; 
+let highScore = parseInt(webstorage.getItem(gamename + "HighScore")) || 0;
 
 // width and height of each platform and where platforms start
 const platformWidth = 65;
