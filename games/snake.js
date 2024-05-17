@@ -217,10 +217,13 @@
         if (snake.x === apple.x && snake.y === apple.y) {
             snake.maxCells++;
             score++;
+            const challenges = JSON.parse(webstorage.getItem(dailyChallengesKey) || "{}");
+            
             //temp solution
             challenges.appleEdgeChallenge = true;
             //
-            const challenges = JSON.parse(webstorage.getItem(dailyChallengesKey) || "{}");
+
+            webstorage.setItem(dailyChallengesKey, JSON.stringify(challenges));
     
             if (challenges.lastResetDate) {
                 if (!challenges.appleEdgeChallenge) {
