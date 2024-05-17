@@ -21,8 +21,8 @@
     canvas.width = 480;
     canvas.height = 854;
 
-    canvas.style.width = `${480 / 1.3}px`;
-    canvas.style.height = `${854 / 1.3}px`;
+    canvas.style.width = `${480 / 1.5}px`;
+    canvas.style.height = `${854 / 1.5}px`;
 
     const basketWidth = 75;
     const basketHeight = 75;
