@@ -242,7 +242,7 @@
     }
 
     function updateScore() {
-        scoreElement.textContent = `Score: ${score}  High Score: ${highScore}`;
+        scoreElement.textContent = `🍎${score} 🏆${highScore}`;
     }
 
     function keyDownHandler(e) {
