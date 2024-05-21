@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onlineplay.fun</title>
+    <title>SimpleGames by Erik Reis</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,8 +36,8 @@
             text-align: center;
         }
         .game img {
-            width: 110px;
-            height: 110px;
+            width: 100px;
+            height: 100px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
@@ -71,7 +71,7 @@
 
 <!-- Background Video -->
 <video class="bg-video" autoplay muted loop>
-    <source src="/assets/bgvideo.webm" type="video/mp4">
+    <source id="videoSource" src="/assets/bgvideos/bgvideo.webm" type="video/mp4">
     Seu navegador não suporta a tag de vídeo.
 </video>
 
@@ -79,31 +79,31 @@
 
 <div class="container">
     <div class="row">
-        <div class="game">
+        <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
             <a href="/game/snake">
                 <img src="/assets/icons/snake.png" alt="Snake">
                 <p>Snake</p>
             </a>
         </div>
-        <div class="game">
+        <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
             <a href="/game/snake2">
                 <img src="/assets/icons/snake2.png" alt="Snake 2">
                 <p>Snake 2</p>
             </a>
         </div>
-        <div class="game">
+        <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
             <a href="/game/snake3">
                 <img src="/assets/icons/snake3.png" alt="Snake 3">
                 <p>Snake 3</p>
             </a>
         </div>
-        <div class="game">
+        <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
             <a href="/game/snake4">
                 <img src="/assets/icons/snake4.png" alt="Snake 4">
                 <p>Snake 4</p>
             </a>
         </div>
-        <div class="game">
+        <div class="game" data-video="/assets/bgvideos/bgvideo-infinitejump.mp4">
             <a href="/game/infinitejump">
                 <img src="/assets/icons/infinitejump.png" alt="Infinite Jump">
                 <p>Infinite Jump</p>
@@ -111,42 +111,78 @@
         </div>
     </div>
     <div class="row">
-        <div class="game">
+        <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
             <a href="/game/flappybird">
                 <img src="/assets/icons/flappybird.png" alt="Flappy Bird">
                 <p>Flappy Bird</p>
             </a>
         </div>
-        <div class="game">
+        <div class="game" data-video="/assets/bgvideos/bgvideo-dino.mp4">
             <a href="/game/dino">
                 <img src="/assets/icons/dino.png" alt="Dino">
                 <p>Dino</p>
             </a>
         </div>
-        <div class="game">
+        <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
             <a href="/game/pacman">
                 <img src="/assets/icons/pacman.png" alt="PacMan">
                 <p>PacMan</p>
             </a>
         </div>
-        <div class="game">
+        <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
             <a href="/game/pong">
                 <img src="/assets/icons/pong.png" alt="Pong">
                 <p>Pong</p>
             </a>
         </div>
-        <div class="game">
+        <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
             <a href="/game/fooddrop">
                 <img src="/assets/icons/fooddrop.png" alt="Food Drop">
                 <p>Food Drop</p>
             </a>
         </div>
+        <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
+            <a href="https://tps.erikreis.fun">
+                <img src="/assets/icons/tpszeroicon.png" alt="Food Drop">
+                <p>TPS Zero</p>
+            </a>
+        </div>
+    </div>
+    <div id="row">
     </div>
 </div>
 
 <div class="footer">
     <p>Made by Erik Reis</p>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const games = document.querySelectorAll('.game');
+        const video = document.querySelector('.bg-video');
+        const videoSource = document.getElementById('videoSource');
+        const defaultVideo = '/assets/bgvideos/bgvideo.webm';
+
+        games.forEach(game => {
+            game.addEventListener('mouseover', function() {
+                const newVideo = this.getAttribute('data-video');
+                if (newVideo !== videoSource.getAttribute('src')) {
+                    videoSource.setAttribute('src', newVideo);
+                    video.load();
+                    video.play();
+                }
+            });
+
+            game.addEventListener('mouseout', function() {
+                if (defaultVideo !== videoSource.getAttribute('src')) {
+                    videoSource.setAttribute('src', defaultVideo);
+                    video.load();
+                    video.play();
+                }
+            });
+        });
+    });
+</script>
 
 </body>
 </html>

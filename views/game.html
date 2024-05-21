@@ -5,26 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SimpleGames by Erik Reis</title>
     <style>
+        body {
+            background-color: #f1f1f1;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
         #mainContainer {
+            display: flex;
+            width: 100%;
+        }
+        #sidebar {
+            border: 2px solid black;
+            border-radius: 10px;
+            width: 160px;
+            background-color: #9e8049;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+        #sidebar h2 {
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            color: black;
+        }
+        .gamebutton {
+            text-decoration: none;
+            color: black;
+            margin: 5px 0;
+            font-size: 12px;
+            text-align: center;
+            display: block;
+            width: 75%;
+            padding: 5px;
+            border: 2px solid #000;
+            border-radius: 15px;
+            background-color: #BBBBBB;
+            transition: background-color 0.3s;
+        }
+
+        .homepagebutton {
+            text-decoration: none;
+            color: black;
+            margin: 5px 0;
+            font-size: 10px;
+            display: block;
+            width: 90%;
+            padding: 10px;
+            transition: background-color 0.3;
+        }
+        .gamebutton:hover {
+            background-color: #DDDDDD;
+        }
+        #gameContainer {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 97vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        #gameContainer {
             position: relative;
         }
         #gameCanvas {
             border: 1px solid black;
             border-radius: 10px;
-            width: 500px;
-            width: 500px;
-        }
-        input {
-            border-radius: 5px;
-            border: 1px solid black
+            width: 550px;
+            width: 550px;
+            transform: translate(10%, 0%);
         }
         #score {
             position: absolute;
@@ -34,76 +84,81 @@
             color: black;
         }
         #rightcontainer {
-            position: absolute;
             top: 10px;
             right: 10px;
             font-size: 16px;
             color: black;
         }
         table {
+            border-radius: 2px;
             border-collapse: collapse;
             width: 250px;
         }
         th, td {
-            border: 1px solid black;
             padding: 8px;
             text-align: left;
         }
-        #othergames {
-            font-size: 12px;
-            position: absolute;
+        .leaderboardfirstrow {
+            color: white;
+            background-color: orange;
+            border: 1px solid white;
+            text-align: center;
         }
-
-        #othergames a {
-            color: black;
+        .leaderboardOtherRows {
+            color: white;
+            background-color: #38b6ff;
+            text-align: center;
+        }
+        .leaderboardOtherRows td {
+            border: 1px solid orange;
+            text-align: center;
+        }
+        .aligncenter {
+            text-align: center;
         }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2427220674328875"
     crossorigin="anonymous"></script>
 </head>
 <body>
-    <div id="othergames">
-        <a href="/">SimpleGames by Erik Reis</a> <br/> <br/> <br/> <br/>
-        <a href="/game/snake">Snake Game</a> <br/> <br/>
-        <a href="/game/snake2">Snake 2</a> <br/> <br/>
-        <a href="/game/snake3">Snake 3</a> <br/> <br/>
-        <a href="/game/snake4">Snake 4</a> <br/> <br/>
-        <a href="/game/flappybird">Flappy Bird Game</a> <br/> <br/>
-        <a href="/game/dino">Dino Game</a> <br/> <br/>
-        <a href="/game/pacman">Pac Man</a> <br/> <br/>
-        <a href="/game/pong">Pong</a> <br/> <br/>
-        <a href="/game/infinitejump">Infinite Jump</a> <br/> <br/>
-        <a href="/game/fooddrop">Food Drop</a> <br/> <br/>
-    </div>
     <div id="mainContainer">
+        <div id="sidebar">
+            <a class="homepagebutton" href="/">SimpleGames by Erik Reis</a>
+            <a class="gamebutton" href="/game/snake">Snake</a>
+            <a class="gamebutton" href="/game/snake2">Snake 2</a>
+            <a class="gamebutton" href="/game/snake3">Snake 3</a>
+            <a class="gamebutton" href="/game/snake4">Snake 4</a>
+            <a class="gamebutton" href="/game/pacman">PacMan</a>
+            <a class="gamebutton" href="/game/pong">Pong</a>
+            <a class="gamebutton" href="/game/dino">Dino</a>
+            <a class="gamebutton" href="/game/infinitejump">Infinite Jump</a>
+            <a class="gamebutton" href="/game/flappybird">Flappy Bird</a>
+            <a class="gamebutton" href="/game/fooddrop">Food Drop</a>
+        </div>
         <div id="gameContainer">
             <canvas id="gameCanvas" width="400" height="400"></canvas>
             <div id="score">Score: 0  High Score: 0</div>
         </div>
-        <div>
-            <div id="rightcontainer">
-                <div id="leaderboard">
-                    <h3>Leaderboard</h3>
-                    <table id="leaderboardTable">
-                        <tr>
-                            <th>Rank</th>
-                            <th>Name</th>
-                            <th>Score</th>
-                        </tr>
-                    </table>
-                    <br/>
-                    <br/>
-                    <div id="submitForm">
-                        <input type="text" id="playerName" placeholder="Your Name">
-                        <button id="submithighscore">Submit High Score</button>
-                    </div>
+        <div id="rightcontainer">
+            <div id="leaderboard">
+                <br/>
+                <br/>
+                <table id="leaderboardTable">
+                    <tr class="leaderboardfirstrow">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                </table>
+                <br/>
+                <br/>
+                <div id="submitForm">
+                    <input type="text" id="playerName" placeholder="Your Name">
+                    <button id="submithighscore">Submit High Score</button>
                 </div>
-                <br/>
-                <br/>
-                <br/>
-                <div id="DailyChallenges">
-                    
-                </div>
+            </div>
+            <div id="DailyChallenges">
+                <!-- Daily Challenges Content -->
             </div>
         </div>
     </div>
