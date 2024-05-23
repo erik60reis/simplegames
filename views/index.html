@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SimpleGames by Erik Reis</title>
     <style>
+        @font-face {
+            font-family: 'BryndanWrite';
+            src: url('/assets/fonts/BryndanWrite.ttf') format('truetype');
+        }
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -13,15 +17,17 @@
             overflow: hidden; /* Remove scrollbars */
         }
         h1 {
+            font-family: 'BryndanWrite', 'sans-serif';
             margin-top: 20px;
             z-index: 2; /* Ensure it appears above the video */
             position: relative; /* Stack context */
+            font-size: 35px;
         }
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 20px;
+            margin-top: 35px;
             z-index: 2; /* Ensure it appears above the video */
             position: relative; /* Stack context */
         }
@@ -29,24 +35,25 @@
             display: flex;
             justify-content: center;
             width: 100%;
-            margin: 10px 0;
+            margin: 5px 0;
         }
         .game {
             margin: 10px;
             text-align: center;
         }
         .game img {
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .game p {
+            font-family: 'BryndanWrite', 'sans-serif';
             margin-top: 5px;
-            font-size: 14px;
+            font-size: 25px;
         }
         .footer {
-            margin-top: 20px;
+            margin-top: 80px;
             font-size: 12px;
             color: #777;
             z-index: 2; /* Ensure it appears above the video */
@@ -106,7 +113,7 @@
         <div class="game" data-video="/assets/bgvideos/bgvideo-infinitejump.mp4">
             <a href="/game/infinitejump">
                 <img src="/assets/icons/infinitejump.png" alt="Infinite Jump">
-                <p>Infinite Jump</p>
+                <p>Infinite <br/> Jump</p>
             </a>
         </div>
     </div>
@@ -114,7 +121,7 @@
         <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
             <a href="/game/flappybird">
                 <img src="/assets/icons/flappybird.png" alt="Flappy Bird">
-                <p>Flappy Bird</p>
+                <p>Flappy <br/> Bird</p>
             </a>
         </div>
         <div class="game" data-video="/assets/bgvideos/bgvideo-dino.mp4">
@@ -138,7 +145,7 @@
         <div class="game" data-video="/assets/bgvideos/bgvideo.webm">
             <a href="/game/fooddrop">
                 <img src="/assets/icons/fooddrop.png" alt="Food Drop">
-                <p>Food Drop</p>
+                <p>Food <br/> Drop</p>
             </a>
         </div>
         <div class="game" data-video="/assets/bgvideos/bgvideo.webm">

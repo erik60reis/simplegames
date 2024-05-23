@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SimpleGames by Erik Reis</title>
     <style>
+        @font-face {
+            font-family: 'BryndanWrite';
+            src: url('/assets/fonts/BryndanWrite.ttf') format('truetype');
+        }
         body {
             background-color: #f1f1f1;
             font-family: Arial, sans-serif;
@@ -18,16 +22,28 @@
             width: 100%;
         }
         #sidebar {
-            border: 2px solid black;
             border-radius: 10px;
             width: 160px;
-            background-color: #9e8049;
+            background-color: #97acac;
             padding: 10px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: flex-start;
+            transition: transform 0.3s;
+        }
+        #toggleSidebarBtn {
+            position: absolute;
+            left: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #97acac;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 0 10px 10px 0;
+            z-index: 10;
         }
         #sidebar h2 {
             margin: 0 0 20px 0;
@@ -38,14 +54,15 @@
             text-decoration: none;
             color: black;
             margin: 5px 0;
-            font-size: 12px;
+            font-size: 14px;
             text-align: center;
             display: block;
             width: 75%;
-            padding: 5px;
+            padding: 1px;
             border: 2px solid #000;
             border-radius: 15px;
-            background-color: #BBBBBB;
+            font-family: 'BryndanWrite', sans-serif;
+            background: linear-gradient(90deg, #a6a6a6, #ffffff);
             transition: background-color 0.3s;
         }
 
@@ -58,9 +75,10 @@
             width: 90%;
             padding: 10px;
             transition: background-color 0.3;
+            font-family: 'BryndanWrite', sans-serif;
         }
         .gamebutton:hover {
-            background-color: #DDDDDD;
+            background: linear-gradient(90deg, #858585, #e2e2e2);
         }
         #gameContainer {
             flex: 1;
@@ -73,26 +91,43 @@
             border: 1px solid black;
             border-radius: 10px;
             width: 550px;
-            width: 550px;
+            height: 550px;
             transform: translate(10%, 0%);
         }
         #score {
             position: absolute;
             top: 10px;
-            left: 10px;
+            left: 20px;
             font-size: 18px;
             color: black;
         }
         #rightcontainer {
-            top: 10px;
-            right: 10px;
+            position: relative;
             font-size: 16px;
             color: black;
+            margin-right: 15px;
+            transition: transform 0.3s;
+        }
+        #rightcontainer.hide {
+            transform: translateX(100%);
+        }
+        #toggleLeaderboardBtn {
+            position: absolute;
+            right: 20.3%;
+            top: 10%;
+            transform: translateY(0%);
+            background-color: rgb(50, 50, 175);
+            font-size: 15px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px 0 0 10px;
         }
         table {
             border-radius: 2px;
             border-collapse: collapse;
-            width: 250px;
+            width: 100%;
         }
         th, td {
             padding: 8px;
@@ -100,27 +135,48 @@
         }
         .leaderboardfirstrow {
             color: white;
-            background-color: orange;
+            background: linear-gradient(90deg, #ff914d, #ffde59);
             border: 1px solid white;
             text-align: center;
         }
         .leaderboardOtherRows {
             color: white;
-            background-color: #38b6ff;
+            background: linear-gradient(90deg, #ff914d, #ffde59);
+            border: 1px solid white;
             text-align: center;
         }
         .leaderboardOtherRows td {
-            border: 1px solid orange;
+            border: 1px solid darkorange;
             text-align: center;
         }
         .aligncenter {
             text-align: center;
+        }
+        #leaderboardContainer {
+            max-height: 200px; /* Adjust the height as needed */
+            overflow-y: auto;
+            padding-right: 15px; /* Creates space for the scrollbar */
+            box-sizing: content-box; /* Ensures padding does not affect the width */
+        }
+        /* Custom scrollbar styling */
+        #leaderboardContainer::-webkit-scrollbar {
+            width: 12px;
+        }
+        #leaderboardContainer::-webkit-scrollbar-thumb {
+            background-color: #ff914d;
+            border-radius: 10px;
+            border: 3px solid #ffde59; /* Creates the separation effect */
+        }
+        #leaderboardContainer::-webkit-scrollbar-track {
+            background-color: #8b502b;
+            border-radius: 10px;
         }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2427220674328875"
     crossorigin="anonymous"></script>
 </head>
 <body>
+    <button id="toggleSidebarBtn"><</button>
     <div id="mainContainer">
         <div id="sidebar">
             <a class="homepagebutton" href="/">SimpleGames by Erik Reis</a>
@@ -136,20 +192,19 @@
             <a class="gamebutton" href="/game/fooddrop">Food Drop</a>
         </div>
         <div id="gameContainer">
-            <canvas id="gameCanvas" width="400" height="400"></canvas>
             <div id="score">Score: 0  High Score: 0</div>
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
         </div>
+        <button id="toggleLeaderboardBtn">></button>
         <div id="rightcontainer">
             <div id="leaderboard">
                 <br/>
                 <br/>
-                <table id="leaderboardTable">
-                    <tr class="leaderboardfirstrow">
-                        <th>Rank</th>
-                        <th>Name</th>
-                        <th>Score</th>
-                    </tr>
-                </table>
+                <div id="leaderboardContainer">
+                    <table id="leaderboardTable">
+                    </table>
+                </div>
+                <br/>
                 <br/>
                 <br/>
                 <div id="submitForm">
@@ -175,6 +230,42 @@
         }
         createScript(`/games/${gamename}.js`);
         createScript(`/assets/leaderboardfunctions.js`);
+
+        // Toggle Sidebar visibility
+
+        const toggleSidebarButton = document.getElementById('toggleSidebarBtn');
+        const toggleLeaderboardButton = document.getElementById('toggleLeaderboardBtn');
+        const sidebar = document.getElementById('sidebar');
+        const leaderboard = document.getElementById('rightcontainer');
+
+        toggleSidebarButton.onclick = toggleSidebar;
+        toggleLeaderboardButton.onclick = toggleLeaderboard;
+
+
+        function toggleSidebar() {
+            if (sidebar.style.display === 'none') {
+                sidebar.style.display = 'flex';
+                toggleSidebarButton.textContent = '<';
+                toggleSidebarButton.style.left = "10%";
+            } else {
+                sidebar.style.display = 'none';
+                toggleSidebarButton.textContent = '>';
+                toggleSidebarButton.style.left = "0%";
+            }   
+        }
+
+        // Toggle Leaderboard visibility
+        function toggleLeaderboard() {
+            if (leaderboard.style.display === 'none') {
+                leaderboard.style.display = 'block';
+                toggleLeaderboardButton.textContent = '>';
+                toggleLeaderboardButton.style.right = "20.3%";
+            } else {
+                leaderboard.style.display = 'none';
+                toggleLeaderboardButton.textContent = '<';
+                toggleLeaderboardButton.style.right = "0%";
+            }
+        }
     </script>
 </body>
 </html>
