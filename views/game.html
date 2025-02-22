@@ -1,226 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimpleGames by Erik Reis</title>
+    <meta name="viewport" content="initial-scale=0.8, user-scalable=no" />
+    <title>Snake Game</title>
     <style>
-        @font-face {
-            font-family: 'BryndanWrite';
-            src: url('/assets/fonts/BryndanWrite.ttf') format('truetype');
-        }
         body {
-            background-color: #f1f1f1;
-            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            display: flex;
-            height: 100vh;
-        }
-        #mainContainer {
-            display: flex;
-            width: 100%;
-        }
-        #sidebar {
-            border-radius: 10px;
-            width: 160px;
-            background-color: #97acac;
-            padding: 10px;
-            box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            align-items: flex-start;
-            transition: transform 0.3s;
-        }
-        #toggleSidebarBtn {
-            position: absolute;
-            left: 10%;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: #97acac;
-            border: none;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 0 10px 10px 0;
-            z-index: 10;
-        }
-        #sidebar h2 {
-            margin: 0 0 20px 0;
-            font-size: 18px;
-            color: black;
-        }
-        .gamebutton {
-            text-decoration: none;
-            color: black;
-            margin: 5px 0;
-            font-size: 14px;
-            text-align: center;
-            display: block;
-            width: 75%;
-            padding: 1px;
-            border: 2px solid #000;
-            border-radius: 15px;
-            font-family: 'BryndanWrite', sans-serif;
-            background: linear-gradient(90deg, #a6a6a6, #ffffff);
-            transition: background-color 0.3s;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            touch-action: none;
+            font-family: Arial, sans-serif;
         }
 
-        .homepagebutton {
-            text-decoration: none;
-            color: black;
-            margin: 5px 0;
-            font-size: 10px;
-            display: block;
-            width: 90%;
-            padding: 10px;
-            transition: background-color 0.3;
-            font-family: 'BryndanWrite', sans-serif;
-        }
-        .gamebutton:hover {
-            background: linear-gradient(90deg, #858585, #e2e2e2);
-        }
         #gameContainer {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             position: relative;
+            margin: 20px;
         }
+
         #gameCanvas {
-            border: 1px solid black;
-            border-radius: 10px;
-            width: 550px;
-            height: 550px;
-            transform: translate(10%, 0%);
+            border: 3px solid #34495e;
+            border-radius: 5px;
+            background-color: #2ecc71;
         }
+
         #score {
             position: absolute;
             top: 10px;
-            left: 20px;
-            font-size: 18px;
+            left: 10px;
             color: black;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 1px 1px white;
         }
-        #rightcontainer {
-            position: relative;
-            font-size: 16px;
-            color: black;
-            margin-right: 15px;
-            transition: transform 0.3s;
+
+        #leaderboard {
+            margin: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        #rightcontainer.hide {
-            transform: translateX(100%);
+
+        #mobileControls {
+            display: none;
+            position: fixed;
+            bottom: 50px;
+            gap: 10px;
         }
-        #toggleLeaderboardBtn {
-            position: absolute;
-            right: 20.3%;
-            top: 10%;
-            transform: translateY(0%);
-            background-color: rgb(50, 50, 175);
-            font-size: 15px;
+
+        .control-row {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin: 10px 0;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: rgba(51, 255, 0, 0.5);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+
+        #submithighscore {
+            margin: 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background: #3498db;
             color: white;
             border: none;
             cursor: pointer;
+        }
+
+        .leaderboardfirstrow th {
             padding: 10px;
-            border-radius: 10px 0 0 10px;
-        }
-        table {
-            border-radius: 2px;
-            border-collapse: collapse;
-            width: 100%;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-        .leaderboardfirstrow {
+            background: #3498db;
             color: white;
-            background: linear-gradient(90deg, #ff914d, #ffde59);
-            border: 1px solid white;
-            text-align: center;
         }
-        .leaderboardOtherRows {
-            color: white;
-            background: linear-gradient(90deg, #ff914d, #ffde59);
-            border: 1px solid white;
-            text-align: center;
-        }
+
         .leaderboardOtherRows td {
-            border: 1px solid darkorange;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
             text-align: center;
         }
-        .aligncenter {
-            text-align: center;
-        }
-        #leaderboardContainer {
-            max-height: 200px; /* Adjust the height as needed */
-            overflow-y: auto;
-            padding-right: 15px; /* Creates space for the scrollbar */
-            box-sizing: content-box; /* Ensures padding does not affect the width */
-        }
-        /* Custom scrollbar styling */
-        #leaderboardContainer::-webkit-scrollbar {
-            width: 12px;
-        }
-        #leaderboardContainer::-webkit-scrollbar-thumb {
-            background-color: #ff914d;
-            border-radius: 10px;
-            border: 3px solid #ffde59; /* Creates the separation effect */
-        }
-        #leaderboardContainer::-webkit-scrollbar-track {
-            background-color: #8b502b;
-            border-radius: 10px;
+
+        @media (max-width: 600px) {
+            #mobileControls {
+                display: flex;
+                flex-direction: column;
+            }
+            #leaderboard {
+                width: 90%;
+            }
         }
     </style>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2427220674328875"
-    crossorigin="anonymous"></script>
 </head>
 <body>
-    <button id="toggleSidebarBtn"><</button>
-    <div id="mainContainer">
-        <div id="sidebar">
-            <a class="homepagebutton" href="/">SimpleGames by Erik Reis</a>
-            <a class="gamebutton" href="/game/snake">Snake</a>
-            <a class="gamebutton" href="/game/snake2">Snake 2</a>
-            <a class="gamebutton" href="/game/snake3">Snake 3</a>
-            <a class="gamebutton" href="/game/snake4">Snake 4</a>
-            <a class="gamebutton" href="/game/pacman">PacMan</a>
-            <a class="gamebutton" href="/game/pong">Pong</a>
-            <a class="gamebutton" href="/game/dino">Dino</a>
-            <a class="gamebutton" href="/game/infinitejump">Infinite Jump</a>
-            <a class="gamebutton" href="/game/flappybird">Flappy Bird</a>
-            <a class="gamebutton" href="/game/fooddrop">Food Drop</a>
-            <a class="gamebutton" href="/game/tetris">tetris</a>
-        </div>
-        <div id="gameContainer">
-            <div id="score">Score: 0  High Score: 0</div>
-            <canvas id="gameCanvas" width="400" height="400"></canvas>
-        </div>
-        <button id="toggleLeaderboardBtn">></button>
-        <div id="rightcontainer">
-            <div id="leaderboard">
-                <br/>
-                <br/>
-                <div id="leaderboardContainer">
-                    <table id="leaderboardTable">
-                    </table>
-                </div>
-                <br/>
-                <br/>
-                <br/>
-                <div id="submitForm">
-                    <input type="text" id="playerName" placeholder="Your Name">
-                    <button id="submithighscore">Submit High Score</button>
-                </div>
+    <div id="gameContainer">
+        <div id="score">🍎0 🏆0</div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="mobileControls">
+            <div class="control-row">
+                <button class="control-btn" id="upBtn">↑</button>
             </div>
-            <div id="DailyChallenges">
-                <!-- Daily Challenges Content -->
+            <div class="control-row">
+                <button class="control-btn" id="leftBtn">←</button>
+                <button class="control-btn" id="rightBtn">→</button>
+            </div>
+            <div class="control-row">
+                <button class="control-btn" id="downBtn">↓</button>
             </div>
         </div>
     </div>
 
-    <!--script src="/assets/babylon.js"></script-->
-    <script src="/assets/jquery.min.js"></script>
+    <div id="leaderboard">
+        <h3>Leaderboard</h3>
+        <input type="text" id="playerName" placeholder="Your name">
+        <button id="submithighscore">Submit Score</button>
+        <table id="leaderboardTable"></table>
+    </div>
     <script src="/assets/isaacCSPRNG.min.js"></script>
     <script>
         let gamename = "{{gamename}}";
@@ -234,7 +143,7 @@
         createScript(`/assets/leaderboardfunctions.js`);
 
         // Toggle Sidebar visibility
-
+        /*
         const toggleSidebarButton = document.getElementById('toggleSidebarBtn');
         const toggleLeaderboardButton = document.getElementById('toggleLeaderboardBtn');
         const sidebar = document.getElementById('sidebar');
@@ -268,6 +177,7 @@
                 toggleLeaderboardButton.style.right = "0%";
             }
         }
+        */
     </script>
 </body>
 </html>

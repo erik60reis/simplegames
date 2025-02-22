@@ -24,7 +24,7 @@
         return leaderboard.find(u => u.name === username);
     })();
 
-    let currentReplay = JSON.parse(replayuser.replay);
+    let currentReplay = JSON.parse(JSON.parse(replayuser.replay));
 
     let replayframeindex = 0;
 
@@ -69,19 +69,19 @@
     }
 
     function update() {
-        if (currentReplay.replayCode[replayframeindex] === "r") {
+        if (currentReplay.replayCode.charAt(replayframeindex) === "r") {
             snake.dx = gridSize;
             snake.dy = 0;
         }
-        if (currentReplay.replayCode[replayframeindex] === "l") {
+        if (currentReplay.replayCode.charAt(replayframeindex) === "l") {
             snake.dx = -gridSize;
             snake.dy = 0;
         }
-        if (currentReplay.replayCode[replayframeindex] === "u") {
+        if (currentReplay.replayCode.charAt(replayframeindex) === "u") {
             snake.dx = 0;
             snake.dy = -gridSize;
         }
-        if (currentReplay.replayCode[replayframeindex] === "d") {
+        if (currentReplay.replayCode.charAt(replayframeindex) === "d") {
             snake.dx = 0;
             snake.dy = gridSize;
         }

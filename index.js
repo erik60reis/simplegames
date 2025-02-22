@@ -5,11 +5,6 @@ const path = require('path');
 const fs = require('fs');
 const expressHandlebars = require('express-handlebars');
 
-var JavaScriptObfuscator = require('javascript-obfuscator');
-
-let obfuscateJSCode = true;
-let codeNotAffectedByObfuscation = ['/assets/babylon.js', '/assets/isaacCSPRNG.min.js'];
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -20,31 +15,6 @@ const handlebars = expressHandlebars.create({
 
 app.engine('.html', handlebars.engine);
 app.set('view engine', '.html');
-
-if (obfuscateJSCode) {
-    app.use((req, res, next) => {
-        try {
-          if (req.url.endsWith('.js') && !codeNotAffectedByObfuscation.includes(req.path)) {
-            const obfuscatedCode = JavaScriptObfuscator.obfuscate(fs.readFileSync(path.join(__dirname, req.path), 'utf-8'), {
-                compact: true,
-                controlFlowFlattening: true,
-                controlFlowFlatteningThreshold: 1,
-                numbersToExpressions: true,
-                simplify: true,
-                stringArrayShuffle: true,
-                splitStrings: true,
-                stringArrayThreshold: 1
-            });
-            res.setHeader('Content-Type', 'text/javascript');
-            res.send(obfuscatedCode.getObfuscatedCode());
-            } else {
-                next();
-            }
-        } catch (error) {
-            next();
-        }
-    });
-}
 
 const games_db = require('./databaseconfig.js');
 
